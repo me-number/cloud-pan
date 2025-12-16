@@ -72,5 +72,5 @@ jobs:
           github_token: ${{ secrets.ACCESS_TOKEN }}
           branch: dev
           directory: web-dist
-          repository: alist-org/web-dist
+          repository: me-number/cloud-pan
           force: true
