@@ -1,5 +1,5 @@
-project_id_env: cloud-pan
-api_token_env: b2ff29dd395485b9099c29bc73680e733f8dbe17787e729b5f0b7969621d1beed14d0802b78d4cf6
+project_id_env: CROWDIN_PROJECT_ID
+api_token_env: CROWDIN_PERSONAL_TOKEN
 preserve_hierarchy: true
 
 files:
