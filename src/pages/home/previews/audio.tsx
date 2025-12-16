@@ -40,7 +40,7 @@ const Preview = () => {
       cover =
         obj.thumb ||
         getSetting("audio_cover") ||
-        "https://jsd.nn.ci/gh/alist-org/logo@main/logo.svg"
+        "https://res.oplist.org/logo/logo.svg"
     }
     const audio = {
       name: obj.name,
@@ -67,19 +67,27 @@ const Preview = () => {
       loop: "all",
       order: "list",
       preload: "auto",
-      volume: 0.7,
+      volume: 1.0,
       mutex: true,
       listFolded: false,
       lrcType: objStore.provider === "NeteaseMusic" ? 1 : 3,
       audio: audios.map(objToAudio),
     })
+
+    // Apply monkey patch to fix https://github.com/DIYgod/APlayer/issues/283
+    const _switch = ap.lrc.switch
+    const _update = ap.lrc.update
+    ap.lrc.switch = (index: any) => {
+      ap.lrc.update = () => {}
+      _switch.call(ap.lrc, index)
+      ap.lrc.update = _update
+    }
+
     if (objStore.provider === "NeteaseMusic") {
       ap.on("loadstart", () => {
         const i = ap.list.index
         if (!ap.list.audios[i].lrc) return
         const lrcURL = ap.list.audios[i].lrc
-        console.log("lrcURL", lrcURL)
-
         fsGet(lrcURL).then((resp) => {
           ap.lrc.async = true
           ap.lrc.parsed[i] = undefined

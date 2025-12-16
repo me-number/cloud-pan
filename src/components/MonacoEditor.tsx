@@ -2,13 +2,10 @@ import { Box } from "@hope-ui/solid"
 import { createEffect, createSignal, onCleanup, onMount } from "solid-js"
 import { MaybeLoading } from "./FullLoading"
 import loader from "@monaco-editor/loader"
-import { monaco_cdn } from "~/utils"
+import { useCDN } from "~/hooks"
+import type * as monacoType from "monaco-editor/esm/vs/editor/editor.api"
+import { local } from "~/store"
 
-loader.config({
-  paths: {
-    vs: monaco_cdn,
-  },
-})
 export interface MonacoEditorProps {
   value: string
   onChange?: (value: string) => void
@@ -16,10 +13,16 @@ export interface MonacoEditorProps {
   path?: string
   language?: string
 }
-let monaco: any
+let monaco: typeof monacoType
 
 export const MonacoEditorLoader = (props: MonacoEditorProps) => {
+  const { monacoPath } = useCDN()
   const [loading, setLoading] = createSignal(true)
+  loader.config({
+    paths: {
+      vs: monacoPath(),
+    },
+  })
   loader.init().then((m) => {
     monaco = m
     setLoading(false)
@@ -33,12 +36,14 @@ export const MonacoEditorLoader = (props: MonacoEditorProps) => {
 
 export const MonacoEditor = (props: MonacoEditorProps) => {
   let monacoEditorDiv: HTMLDivElement
-  let monacoEditor: any /*monaco.editor.IStandaloneCodeEditor*/
-  let model: any /*monaco.editor.ITextModel*/
+  let monacoEditor: monacoType.editor.IStandaloneCodeEditor
+  let model: monacoType.editor.ITextModel
+
   onMount(() => {
     monacoEditor = monaco.editor.create(monacoEditorDiv!, {
       value: props.value,
       theme: props.theme,
+      fontSize: parseInt(local.editor_font_size),
     })
     model = monaco.editor.createModel(
       props.value,
@@ -57,6 +62,13 @@ export const MonacoEditor = (props: MonacoEditorProps) => {
   createEffect(() => {
     monaco.editor.setTheme(props.theme)
   })
+
+  createEffect(() => {
+    monacoEditor?.updateOptions({
+      fontSize: parseInt(local.editor_font_size),
+    })
+  })
+
   onCleanup(() => {
     model && model.dispose()
     monacoEditor && monacoEditor.dispose()

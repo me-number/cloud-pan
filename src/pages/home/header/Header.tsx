@@ -13,23 +13,13 @@ import { getMainColor, getSetting, local, objStore, State } from "~/store"
 import { BsSearch } from "solid-icons/bs"
 import { CenterLoading } from "~/components"
 import { Container } from "../Container"
-import { bus, joinBase } from "~/utils"
+import { bus } from "~/utils"
 import { Layout } from "./layout"
 import { isMac } from "~/utils/compatibility"
 
 export const Header = () => {
   const logos = getSetting("logo").split("\n")
-  const defaultLogo =
-    logos[0] === "https://cdn.jsdelivr.net/gh/alist-org/logo@main/logo.svg"
-      ? joinBase("/images/new_icon.png")
-      : logos[0]
-  const logo = useColorModeValue(
-    defaultLogo,
-    logos[logos.length - 1] ===
-      "https://cdn.jsdelivr.net/gh/alist-org/logo@main/logo.svg"
-      ? joinBase("/images/new_icon.png")
-      : logos[logos.length - 1] || defaultLogo,
-  )
+  const logo = useColorModeValue(logos[0], logos.pop())
 
   const stickyProps = createMemo<CenterProps>(() => {
     switch (local["position_of_header_navbar"]) {
@@ -67,6 +57,7 @@ export const Header = () => {
             <Show when={objStore.state === State.Folder}>
               <Show when={getSetting("search_index") !== "none"}>
                 <HStack
+                  bg="$neutral4"
                   w="$32"
                   p="$1"
                   rounded="$md"
@@ -74,17 +65,9 @@ export const Header = () => {
                   border="2px solid transparent"
                   cursor="pointer"
                   color={getMainColor()}
-                  style={{
-                    backgroundColor: changeColor(getMainColor(), {
-                      alpha: 0.15,
-                    }),
-                  }}
+                  bgColor={changeColor(getMainColor(), { alpha: 0.15 })}
                   _hover={{
-                    style: {
-                      backgroundColor: changeColor(getMainColor(), {
-                        alpha: 0.2,
-                      }),
-                    },
+                    bgColor: changeColor(getMainColor(), { alpha: 0.2 }),
                   }}
                   onClick={() => {
                     bus.emit("tool", "search")

@@ -9,11 +9,8 @@ import {
   RenameObj,
   ArchiveMeta,
   ArchiveList,
-  StoreObj,
 } from "~/types"
 import { r } from "."
-import { me } from "~/store"
-import { joinBase, pathJoin } from "~/utils"
 
 export const fsGet = (
   path: string = "/",
@@ -55,17 +52,11 @@ export const fsList = (
 }
 
 export const fsDirs = (
-  path: string = "/",
+  path = "/",
   password = "",
   forceRoot = false,
 ): PResp<Obj[]> => {
-  // 如果是强制根目录，使用原始路径，否则使用当前访问路径作为根节点
-  const finalPath = path
-  return r.post("/fs/dirs", {
-    path: finalPath,
-    password,
-    force_root: forceRoot,
-  })
+  return r.post("/fs/dirs", { path, password, force_root: forceRoot })
 }
 
 export const fsMkdir = (path: string): PEmptyResp => {
@@ -92,8 +83,15 @@ export const fsMove = (
   dst_dir: string,
   names: string[],
   overwrite: boolean,
+  skip_existing: boolean,
 ): PEmptyResp => {
-  return r.post("/fs/move", { src_dir, dst_dir, names, overwrite })
+  return r.post("/fs/move", {
+    src_dir,
+    dst_dir,
+    names,
+    overwrite,
+    skip_existing,
+  })
 }
 
 export const fsRecursiveMove = (
@@ -109,8 +107,17 @@ export const fsCopy = (
   dst_dir: string,
   names: string[],
   overwrite: boolean,
+  skip_existing: boolean,
+  merge: boolean,
 ): PEmptyResp => {
-  return r.post("/fs/copy", { src_dir, dst_dir, names, overwrite })
+  return r.post("/fs/copy", {
+    src_dir,
+    dst_dir,
+    names,
+    overwrite,
+    skip_existing,
+    merge,
+  })
 }
 
 export const fsRemove = (dir: string, names: string[]): PEmptyResp => {
@@ -191,6 +198,7 @@ export const fsArchiveDecompress = (
   inner_path = "/",
   cache_full = true,
   put_into_new_dir = false,
+  overwrite = false,
 ): PEmptyResp => {
   return r.post("/fs/archive/decompress", {
     src_dir,
@@ -200,40 +208,7 @@ export const fsArchiveDecompress = (
     inner_path,
     cache_full,
     put_into_new_dir,
-  })
-}
-
-export type S3TransitionArchivePayload = {
-  action: "archive"
-  storage_class: string
-  days?: number
-}
-
-export type S3TransitionRestorePayload = {
-  action: "restore"
-  days: number
-  tier?: string
-}
-
-export type S3TransitionPayload =
-  | S3TransitionArchivePayload
-  | S3TransitionRestorePayload
-
-export type S3TransitionResponse = {
-  task_id?: number | string
-}
-
-export const fsS3Transition = (
-  path: string,
-  payload: S3TransitionPayload,
-  password = "",
-): PResp<S3TransitionResponse> => {
-  const method = payload.action === "archive" ? "archive" : "thaw"
-  return r.post("/fs/other", {
-    path,
-    password,
-    method,
-    data: payload,
+    overwrite,
   })
 }
 
@@ -258,7 +233,7 @@ export const fetchText = async (
       responseType: "blob",
       params: ts
         ? {
-            alist_ts: new Date().getTime(),
+            openlist_ts: new Date().getTime(),
           }
         : undefined,
     })
@@ -305,198 +280,4 @@ export const updateIndex = async (paths = [], max_depth = -1): PEmptyResp => {
     paths,
     max_depth,
   })
-}
-
-export const getLabelList = (): PResp<any> => {
-  return r.get("/label/list")
-}
-
-export const createLabel = (
-  name: string,
-  description: string,
-  bg_color: string,
-): PEmptyResp => {
-  return r.post("/admin/label/create", { name, description, bg_color })
-}
-
-export const updateLabel = (
-  id: number,
-  name: string,
-  description: string,
-  bg_color: string,
-): PEmptyResp => {
-  return r.post("/admin/label/update", { id, name, description, bg_color })
-}
-
-export const getLabelDetail = (id: number): PResp<any> => {
-  return r.get(`/label/get?id=${id}`)
-}
-
-export const getFilesByLabel = (label_id: number): PResp<any> => {
-  return r.get(`/label_file_binding/get_file_by_label?label_id=${label_id}`)
-}
-
-export const createLabelFileBinding = (
-  label_ids: string,
-  obj: StoreObj & Obj,
-): PEmptyResp => {
-  return r.post("/admin/label_file_binding/create", {
-    label_ids,
-    name: obj.name,
-    id: obj.id,
-    path: obj.path,
-    size: obj.size,
-    is_dir: obj.is_dir,
-    modified: obj.modified,
-    created: obj.created,
-    sign: obj.sign,
-    thumb: obj.thumb,
-    type: obj.type,
-    hashinfo: obj.hashinfo,
-  })
-}
-// 批量打标签
-export const createLabelFileBindingBatch = (
-  labelIds: string[],
-  items: StoreObj[],
-): PEmptyResp => {
-  const requestData = {
-    items: items.map((obj) => ({
-      path: (obj as any).path || "",
-      name: obj.name,
-      isDir: obj.is_dir,
-      labelIdList: labelIds.map((id) => parseInt(id)),
-      size: obj.size || 0,
-      type: obj.type || 0,
-      modified: obj.modified || "2025-08-15T00:00:00Z",
-      created: (obj as any).created || "2025-08-15T00:00:00Z",
-      sign: obj.sign || "",
-      thumb: obj.thumb || "",
-      hashInfoStr: (obj as any).hashinfo || "",
-    })),
-  }
-
-  return r.post("/admin/label_file_binding/create_batch", requestData)
-}
-
-export const getLabelFileBinding = (file_name?: string): PResp<any> => {
-  return r.post("/label_file_binding/get", { file_name })
-}
-
-export const getRoleList = (): PResp<any> => {
-  return r.get("/admin/role/list")
-}
-
-export interface Role {
-  id: number
-  name: string
-  description: string
-  permission_scopes: {
-    path: string
-    permission: number
-  }[]
-}
-
-export const getRoleDetail = (id: number): PResp<Role> => {
-  return r.get(`/admin/role/get`, { params: { id } })
-}
-
-export interface Permission {
-  id: number
-  name: string
-  description: string
-  permission: number
-  path_pattern: string
-  allow_op: string[]
-  allow_op_info: null
-  created_at: string
-  updated_at: string
-}
-
-export const getPermissionDetail = (id: number): PResp<Permission> => {
-  return r.get(`/permission/${id}`)
-}
-
-interface PermissionResponse {
-  content: Permission[]
-}
-
-export const getPermissionList = (): PResp<PermissionResponse> => {
-  return r.get("/permission")
-}
-
-interface PermissionRequest {
-  id?: number
-  name: string
-  description: string
-  path_pattern: string
-  permission: number
-}
-
-export const createPermission = (data: PermissionRequest): PEmptyResp => {
-  return r.post("/permission", data)
-}
-
-export const updatePermission = (data: PermissionRequest): PEmptyResp => {
-  return r.put("/permission", data)
-}
-
-export const deletePermission = (id: number): PEmptyResp => {
-  return r.delete(`/permission/${id}`)
-}
-
-interface RoleRequest {
-  id?: number
-  name: string
-  description: string
-  permission_scopes: {
-    path: string
-    permission: number
-  }[]
-}
-
-export const createRole = (data: RoleRequest): PEmptyResp => {
-  return r.post("/admin/role/create", data)
-}
-
-export const updateRole = (data: RoleRequest): PEmptyResp => {
-  return r.post("/admin/role/update", data)
-}
-
-export const deleteRole = (id: number): PEmptyResp => {
-  return r.post(`/admin/role/delete?id=${id}`)
-}
-
-interface RegisterRequest {
-  username: string
-  password: string
-}
-
-// 用户注册
-export const register = (data: RegisterRequest): PEmptyResp => {
-  return r.post("/auth/register", data)
-}
-// 当前用户活跃会话
-export const getMySession = (): PResp<any> => {
-  return r.get("/me/sessions")
-}
-// 踢出我的某个会话
-export const evictMySession = (session_id: string): PEmptyResp => {
-  return r.post("/me/sessions/evict", { session_id })
-}
-// 列出全站会话（管理员）
-export const getSessionList = (): PResp<any> => {
-  return r.get("/admin/session/list")
-}
-
-// 踢出指定会话（管理员）
-export const evictSession = (session_id: string): PEmptyResp => {
-  return r.post("/admin/session/evict", { session_id })
-}
-
-export const cleanSessions = (data?: {
-  user_id?: number
-  session_id?: string
-}): PEmptyResp => {
-  return r.post("/admin/session/clean", data || {})
 }

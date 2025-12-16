@@ -60,7 +60,7 @@ const Creator = (props: { name: string; role: number }) => {
       css={{
         overflow: "hidden",
         whiteSpace: "nowrap",
-        text: "ellipsis",
+        textOverflow: "ellipsis",
       }}
     >
       {props.name}
@@ -89,13 +89,9 @@ export const cols: TaskCol[] = [
   {
     name: "name",
     textAlign: "left",
-    w: me().role.includes(2) ? "calc(100% - 660px)" : "calc(100% - 560px)",
+    w: me().role === 2 ? "calc(100% - 660px)" : "calc(100% - 560px)",
   },
-  {
-    name: "creator",
-    textAlign: "center",
-    w: me().role.includes(2) ? "100px" : "0",
-  },
+  { name: "creator", textAlign: "center", w: me().role === 2 ? "100px" : "0" },
   { name: "state", textAlign: "center", w: "100px" },
   { name: "progress", textAlign: "left", w: "140px" },
   { name: "speed", textAlign: "center", w: "100px" },
@@ -137,7 +133,7 @@ export const Task = (props: TaskAttribute & TasksProps & TaskLocalSetter) => {
     props.nameAnalyzer.regex,
   )
   const title =
-    matches === null ? props.name : props.nameAnalyzer.title(matches, props)
+    matches === null ? props.name : props.nameAnalyzer.title(matches)
   const startTime =
     props.start_time === null ? -1 : new Date(props.start_time).getTime()
   const endTime =
@@ -147,20 +143,14 @@ export const Task = (props: TaskAttribute & TasksProps & TaskLocalSetter) => {
   let speedText = "-"
   const parseSpeedText = (timeDelta: number, lengthDelta: number) => {
     let delta = lengthDelta / timeDelta
-    let unit = "bytes/s"
-    if (delta > 1024) {
-      delta /= 1024
-      unit = "KB/s"
+    const units = ["B/s", "KiB/s", "MiB/s", "GiB/s", "TiB/s", "PiB/s", "EiB/s"]
+    const k = 1024
+    let unit_i = 0
+    while (unit_i < units.length - 1 && delta >= k) {
+      delta /= k
+      unit_i++
     }
-    if (delta > 1024) {
-      delta /= 1024
-      unit = "MB/s"
-    }
-    if (delta > 1024) {
-      delta /= 1024
-      unit = "GB/s"
-    }
-    return `${delta.toFixed(2)} ${unit}`
+    return `${delta.toFixed(2)} ${units[unit_i]}`
   }
   if (props.done) {
     if (
@@ -209,7 +199,7 @@ export const Task = (props: TaskAttribute & TasksProps & TaskLocalSetter) => {
             {title}
           </Heading>
         </HStack>
-        <Show when={me().role.includes(2)}>
+        <Show when={me().role === 2}>
           <Center w={cols[1].w}>
             <Creator name={props.creator} role={props.creator_role} />
           </Center>
@@ -315,7 +305,7 @@ export const Task = (props: TaskAttribute & TasksProps & TaskLocalSetter) => {
             <Show when={matches !== null}>
               <For each={Object.entries(props.nameAnalyzer.attrs)}>
                 {(entry) => {
-                  const value = entry[1](matches as RegExpMatchArray, props)
+                  const value = entry[1](matches as RegExpMatchArray)
                   return value === undefined ? null : (
                     <Show when={entry[1] !== undefined}>
                       <GridItem
@@ -338,9 +328,7 @@ export const Task = (props: TaskAttribute & TasksProps & TaskLocalSetter) => {
             >
               {t(`tasks.attr.status`)}
             </GridItem>
-            <GridItem color="$neutral9">
-              {props.nameAnalyzer.statusText?.(props) ?? props.status}
-            </GridItem>
+            <GridItem color="$neutral9">{props.status}</GridItem>
             <Show when={props.error}>
               <GridItem
                 color="$danger9"

@@ -1,6 +1,0 @@
-node_modules/
-dist/
-.vscode/
-coverage/
-solid-router-*.tgz
-.DS_Store

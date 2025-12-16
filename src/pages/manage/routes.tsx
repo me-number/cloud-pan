@@ -16,6 +16,14 @@ const hide_routes: Route[] = [
     component: lazy(() => import("./storages/AddOrEdit")),
   },
   {
+    to: "/shares/add",
+    component: lazy(() => import("./shares/AddOrEdit")),
+  },
+  {
+    to: "/shares/edit/:id",
+    component: lazy(() => import("./shares/AddOrEdit")),
+  },
+  {
     to: "/users/add",
     component: lazy(() => import("./users/AddOrEdit")),
   },
@@ -30,22 +38,6 @@ const hide_routes: Route[] = [
   {
     to: "/metas/edit/:id",
     component: lazy(() => import("./metas/AddOrEdit")),
-  },
-  {
-    to: "/permissions/add",
-    component: lazy(() => import("./permissions/AddOrEdit")),
-  },
-  {
-    to: "/permissions/config/edit/:id",
-    component: lazy(() => import("./permissions/PermissionForm")),
-  },
-  {
-    to: "/permissions/config/add",
-    component: lazy(() => import("./permissions/PermissionForm")),
-  },
-  {
-    to: "/permissions/edit/:id",
-    component: lazy(() => import("./permissions/AddOrEdit")),
   },
   {
     to: "/2fa",

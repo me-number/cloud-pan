@@ -23,8 +23,10 @@ import {
   SelectValue,
   VStack,
   Switch as HopeSwitch,
+  IconButton,
 } from "@hope-ui/solid"
 import { For, Match, onCleanup, Switch } from "solid-js"
+import { FaSolidMinus, FaSolidPlus } from "solid-icons/fa"
 import { SwitchLanguageWhite, SwitchColorMode } from "~/components"
 import { useT } from "~/hooks"
 import { initialLocalSettings, local, LocalSetting, setLocal } from "~/store"
@@ -58,13 +60,7 @@ function LocalSettingEdit(props: LocalSetting) {
             </SelectTrigger>
             <SelectContent>
               <SelectListbox>
-                <For
-                  each={
-                    typeof props.options === "function"
-                      ? props.options()
-                      : props.options
-                  }
-                >
+                <For each={props.options}>
                   {(item) => (
                     <SelectOption value={item}>
                       <SelectOptionText>
@@ -81,10 +77,44 @@ function LocalSettingEdit(props: LocalSetting) {
         <Match when={props.type === "boolean"}>
           <HopeSwitch
             defaultChecked={local[props.key] === "true"}
-            onChange={(e) => {
+            onChange={(e: { currentTarget: HTMLInputElement }) => {
               setLocal(props.key, e.currentTarget.checked.toString())
             }}
           />
+        </Match>
+        <Match when={props.type === "number"}>
+          <HStack>
+            <IconButton
+              aria-label="decrease"
+              icon={<FaSolidMinus />}
+              onClick={() => {
+                setLocal(
+                  props.key,
+                  Math.max(1, parseInt(local[props.key]) - 1).toString(),
+                )
+              }}
+            />
+            <Input
+              type="number"
+              value={local[props.key]}
+              onInput={(e) => {
+                setLocal(props.key, e.currentTarget.value)
+              }}
+              style={{
+                "-moz-appearance": "textfield",
+                "::-webkit-inner-spin-button": { display: "none" },
+                "::-webkit-outer-spin-button": { display: "none" },
+              }}
+              class="hide-spin"
+            />
+            <IconButton
+              aria-label="increase"
+              icon={<FaSolidPlus />}
+              onClick={() => {
+                setLocal(props.key, (parseInt(local[props.key]) + 1).toString())
+              }}
+            />
+          </HStack>
         </Match>
       </Switch>
     </FormControl>

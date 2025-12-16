@@ -15,8 +15,8 @@ import { lazy } from "solid-js"
 import { ModalWrapper } from "./ModalWrapper"
 import { LocalSettings } from "./LocalSettings"
 import { BackTop } from "./BackTop"
-import { Decompress } from "~/pages/home/toolbar/Decompress"
-import { S3TransitionModal } from "~/pages/home/toolbar/S3TransitionModal"
+import { Decompress } from "./Decompress"
+import { Share } from "./Share"
 
 const Upload = lazy(() => import("../uploads/Upload"))
 
@@ -28,9 +28,9 @@ export const Modal = () => {
       <Rename />
       <Delete />
       <Decompress />
-      <S3TransitionModal />
       <NewFile />
       <Mkdir />
+      <Share />
       <RecursiveMove />
       <RemoveEmptyDirectory />
       <BatchRename />

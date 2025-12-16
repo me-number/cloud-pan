@@ -17,6 +17,7 @@ import {
   VStack,
 } from "@hope-ui/solid"
 import { BiSolidRightArrow, BiSolidFolderOpen } from "solid-icons/bi"
+import { TbX, TbCheck } from "solid-icons/tb"
 import {
   Accessor,
   createContext,
@@ -28,30 +29,28 @@ import {
   createEffect,
   on,
   JSXElement,
+  onMount,
 } from "solid-js"
 import { useFetch, useT, useUtil } from "~/hooks"
-import { getMainColor, password, me } from "~/store"
+import { getMainColor, password } from "~/store"
 import { Obj } from "~/types"
 import {
   pathBase,
   handleResp,
+  handleRespWithNotifySuccess,
   hoverColor,
   pathJoin,
-  fsList,
+  fsDirs,
   createMatcher,
+  fsMkdir,
+  validateFilename,
+  notify,
 } from "~/utils"
-import { useRouter } from "~/hooks"
-
-// 添加权限路径类型
-interface PermPath {
-  path: string
-  permission: number
-}
 
 export type FolderTreeHandler = {
   setPath: Setter<string>
+  startCreateFolder: () => void
 }
-
 export interface FolderTreeProps {
   onChange: (path: string) => void
   forceRoot?: boolean
@@ -59,31 +58,27 @@ export interface FolderTreeProps {
   handle?: (handler: FolderTreeHandler) => void
   showEmptyIcon?: boolean
   showHiddenFolder?: boolean
-  defaultValue?: string
 }
-
 interface FolderTreeContext extends Omit<FolderTreeProps, "handle"> {
   value: Accessor<string>
-  permPaths?: PermPath[]
+  creatingFolderPath: Accessor<string | null>
+  setCreatingFolderPath: Setter<string | null>
 }
-
 const context = createContext<FolderTreeContext>()
-
-// 检查路径是否在权限范围内
-const isPathInPermissions = (path: string, permPaths: PermPath[]) => {
-  return permPaths.some((perm) => {
-    // 如果是权限路径本身或其子路径
-    return path === perm.path || path.startsWith(perm.path + "/")
-  })
-}
-
 export const FolderTree = (props: FolderTreeProps) => {
-  const [path, setPath] = createSignal(props.defaultValue ?? "/")
-  const permPaths = me().permissions || []
-  const userRole = me().role || []
+  const [path, setPath] = createSignal("/")
+  const [creatingFolderPath, setCreatingFolderPath] = createSignal<
+    string | null
+  >(null)
 
-  // 判断是否为管理员（role包含2）
-  const isAdmin = userRole.includes(2)
+  const startCreateFolder = () => {
+    setCreatingFolderPath(path())
+  }
+
+  props.handle?.({
+    setPath,
+    startCreateFolder,
+  })
 
   return (
     <Box class="folder-tree-box" w="$full" overflowX="auto">
@@ -98,23 +93,17 @@ export const FolderTree = (props: FolderTreeProps) => {
           forceRoot: props.forceRoot ?? false,
           showEmptyIcon: props.showEmptyIcon ?? false,
           showHiddenFolder: props.showHiddenFolder ?? true,
-          permPaths: permPaths,
+          creatingFolderPath,
+          setCreatingFolderPath,
         }}
       >
-        <Show when={isAdmin}>
-          <FolderTreeNode path="/" isRoot />
-        </Show>
-        <Show when={!isAdmin && permPaths.length > 0}>
-          <For each={permPaths}>
-            {(perm) => <FolderTreeNode path={perm.path} isRoot />}
-          </For>
-        </Show>
+        <FolderTreeNode path="/" />
       </context.Provider>
     </Box>
   )
 }
 
-const FolderTreeNode = (props: { path: string; isRoot?: boolean }) => {
+const FolderTreeNode = (props: { path: string }) => {
   const { isHidePath } = useUtil()
   const [children, setChildren] = createSignal<Obj[]>()
   const {
@@ -124,50 +113,32 @@ const FolderTreeNode = (props: { path: string; isRoot?: boolean }) => {
     autoOpen,
     showEmptyIcon,
     showHiddenFolder,
-    permPaths = [],
+    creatingFolderPath,
+    setCreatingFolderPath,
   } = useContext(context)!
-
   const emptyIconVisible = () =>
     Boolean(showEmptyIcon && children() !== undefined && !children()?.length)
-
-  const [loading, fetchList] = useFetch(() => {
-    return fsList(props.path, password(), 1, 0, false)
-  })
-
+  const [loading, fetchDirs] = useFetch(() =>
+    fsDirs(props.path, password(), forceRoot),
+  )
   let isLoaded = false
-  const load = async () => {
-    if (children()?.length) return
-    const resp = await fetchList()
+  const load = async (force = false) => {
+    if (!force && children()?.length) return
+    const resp = await fetchDirs() // this api may return null
     handleResp(
       resp,
       (data) => {
         isLoaded = true
-        // 只保留文件夹类型的项目
-        let filteredDirs = data.content.filter((item) => item.is_dir)
-
-        // 如果不是管理员，才进行权限过滤
-        const userRole = me().role || []
-        const isAdmin = userRole.includes(2)
-
-        if (!isAdmin && permPaths.length > 0) {
-          filteredDirs = filteredDirs.filter((item) => {
-            const fullPath = pathJoin(props.path, item.name)
-            return isPathInPermissions(fullPath, permPaths)
-          })
-        }
-
-        setChildren(filteredDirs)
+        setChildren(data)
       },
       () => {
-        if (isOpen()) onToggle()
+        if (isOpen()) onToggle() // close folder while failed
       },
     )
   }
-
   const { isOpen, onToggle } = createDisclosure()
   const active = () => value() === props.path
   const isMatchedFolder = createMatcher(props.path)
-
   const checkIfShouldOpen = async (pathname: string) => {
     if (!autoOpen) return
     if (isMatchedFolder(pathname)) {
@@ -175,12 +146,17 @@ const FolderTreeNode = (props: { path: string; isRoot?: boolean }) => {
       if (!isLoaded) load()
     }
   }
-
   createEffect(on(value, checkIfShouldOpen))
+
+  createEffect(() => {
+    if (creatingFolderPath() === props.path) {
+      if (!isOpen()) onToggle()
+      if (!isLoaded) load()
+    }
+  })
 
   const isHiddenFolder = () =>
     isHidePath(props.path) && !isMatchedFolder(value())
-
   return (
     <Show when={showHiddenFolder || !isHiddenFolder()}>
       <Box>
@@ -210,15 +186,17 @@ const FolderTreeNode = (props: { path: string; isRoot?: boolean }) => {
           </Show>
           <Text
             css={{
+              // textOverflow: "ellipsis",
               whiteSpace: "nowrap",
             }}
+            // overflow="hidden"
             fontSize="$md"
             cursor="pointer"
             px="$1"
             rounded="$md"
             bgColor={active() ? "$info8" : "transparent"}
             _hover={{
-              backgroundColor: active() ? "$info8" : hoverColor(),
+              bgColor: active() ? "$info8" : hoverColor(),
             }}
             onClick={() => {
               onChange(props.path)
@@ -234,10 +212,126 @@ const FolderTreeNode = (props: { path: string; isRoot?: boolean }) => {
                 <FolderTreeNode path={pathJoin(props.path, item.name)} />
               )}
             </For>
+            <Show when={creatingFolderPath() === props.path}>
+              <FolderNameInput
+                parentPath={props.path}
+                onCancel={() => setCreatingFolderPath(null)}
+                onSuccess={(fullPath) => {
+                  setCreatingFolderPath(null)
+                  onChange(fullPath)
+                  load(true)
+                }}
+              />
+            </Show>
           </VStack>
         </Show>
       </Box>
     </Show>
+  )
+}
+
+const FOCUS_DELAY_MS = 0 // allow DOM to mount before focusing
+
+const FolderNameInput = (props: {
+  parentPath: string
+  onCancel: () => void
+  onSuccess: (fullPath: string) => void
+}) => {
+  const t = useT()
+  const [folderName, setFolderName] = createSignal("")
+  const [loading, mkdir] = useFetch(fsMkdir)
+
+  const handleSubmit = async () => {
+    const name = folderName().trim()
+    if (!name || loading()) return
+
+    const validation = validateFilename(name)
+    if (!validation.valid) {
+      notify.warning(t(`global.${validation.error}`))
+      return
+    }
+
+    const fullPath = pathJoin(props.parentPath, name)
+    const resp = await mkdir(fullPath)
+    handleRespWithNotifySuccess(
+      resp,
+      () => {
+        props.onSuccess(fullPath)
+      },
+      () => {
+        props.onCancel()
+      },
+    )
+  }
+
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    setTimeout(() => {
+      inputRef?.focus()
+      inputRef?.select()
+    }, FOCUS_DELAY_MS)
+  })
+
+  return (
+    <HStack spacing="$2" w="$full" pl="$4" alignItems="center">
+      <Icon color={getMainColor()} as={BiSolidFolderOpen} />
+      <Input
+        ref={(el) => (inputRef = el)}
+        value={folderName()}
+        onInput={(e) => setFolderName(e.currentTarget.value)}
+        placeholder={t("home.toolbar.input_dir_name")}
+        size="sm"
+        flex="1"
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault()
+            handleSubmit()
+          } else if (e.key === "Escape") {
+            props.onCancel()
+          }
+        }}
+        onBlur={(e) => {
+          if (loading()) return
+          const next = e.relatedTarget as HTMLElement | null
+          if (next?.dataset.folderAction === "true") return
+          if (!folderName().trim()) {
+            props.onCancel()
+          }
+        }}
+      />
+      <Show
+        when={!loading()}
+        fallback={<Spinner size="sm" color={getMainColor()} />}
+      >
+        <Button
+          aria-label={t("global.ok")}
+          size="sm"
+          variant="ghost"
+          rounded="$md"
+          p="$1"
+          color="$success9"
+          onClick={handleSubmit}
+          tabIndex={0}
+          data-folder-action="true"
+        >
+          <Icon as={TbCheck} boxSize="$6" />
+        </Button>
+      </Show>
+      <Button
+        aria-label={t("global.cancel")}
+        size="sm"
+        variant="ghost"
+        rounded="$md"
+        p="$1"
+        color="$danger9"
+        onClick={props.onCancel}
+        tabIndex={0}
+        data-folder-action="true"
+      >
+        <Icon as={TbX} boxSize="$6" />
+      </Button>
+    </HStack>
   )
 }
 
@@ -246,20 +340,28 @@ export type ModalFolderChooseProps = {
   onClose: () => void
   onSubmit?: (text: string) => void
   type?: string
-  defaultValue?: string
+  defaultValue?: string | (() => string)
   loading?: boolean
   footerSlot?: JSXElement
+  headerSlot?: (handler: FolderTreeHandler | undefined) => JSXElement
   children?: JSXElement
   header: string
 }
 export const ModalFolderChoose = (props: ModalFolderChooseProps) => {
   const t = useT()
-  const [value, setValue] = createSignal(props.defaultValue ?? "/")
+  const [value, setValue] = createSignal("/")
   const [handler, setHandler] = createSignal<FolderTreeHandler>()
   createEffect(() => {
     if (!props.opened) return
     handler()?.setPath(value())
   })
+  if (typeof props.defaultValue === "function") {
+    createEffect(() => {
+      setValue((props.defaultValue as () => string)())
+    })
+  } else if (typeof props.defaultValue === "string") {
+    setValue(props.defaultValue)
+  }
   return (
     <Modal
       size="xl"
@@ -271,7 +373,12 @@ export const ModalFolderChoose = (props: ModalFolderChooseProps) => {
       <ModalContent>
         {/* <ModalCloseButton /> */}
         <ModalHeader w="$full" css={{ overflowWrap: "break-word" }}>
-          {props.header}
+          <HStack w="$full" justifyContent="space-between" alignItems="center">
+            <Box css={{ overflowWrap: "break-word" }}>{props.header}</Box>
+            <Show when={props.headerSlot && handler()}>
+              {props.headerSlot!(handler()!)}
+            </Show>
+          </HStack>
         </ModalHeader>
         <ModalBody>
           {props.children}
@@ -279,20 +386,29 @@ export const ModalFolderChoose = (props: ModalFolderChooseProps) => {
             onChange={setValue}
             handle={(h) => setHandler(h)}
             autoOpen
-            defaultValue={value()}
           />
         </ModalBody>
-        <ModalFooter display="flex" gap="$2">
-          <Show when={props.footerSlot}>{props.footerSlot}</Show>
-          <Button onClick={props.onClose} colorScheme="neutral">
-            {t("global.cancel")}
-          </Button>
-          <Button
-            loading={props.loading}
-            onClick={() => props.onSubmit?.(value())}
-          >
-            {t("global.ok")}
-          </Button>
+        <ModalFooter
+          display="flex"
+          w="$full"
+          gap="$4"
+          alignItems="flex-end"
+          justifyContent="flex-end"
+        >
+          <Show when={props.footerSlot}>
+            <Box mr="auto">{props.footerSlot}</Box>
+          </Show>
+          <HStack spacing="$2">
+            <Button onClick={props.onClose} colorScheme="neutral">
+              {t("global.cancel")}
+            </Button>
+            <Button
+              loading={props.loading}
+              onClick={() => props.onSubmit?.(value())}
+            >
+              {t("global.ok")}
+            </Button>
+          </HStack>
         </ModalFooter>
       </ModalContent>
     </Modal>

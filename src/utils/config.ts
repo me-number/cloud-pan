@@ -10,13 +10,13 @@ export const setBasePath = (path: string) => {
     base_path = base_path.slice(0, -1)
   }
 }
-if (window.ALIST.base_path) {
-  setBasePath(window.ALIST.base_path)
+if (window.OPENLIST_CONFIG.base_path) {
+  setBasePath(window.OPENLIST_CONFIG.base_path)
 }
 
 export let api = import.meta.env.VITE_API_URL as string
-if (window.ALIST.api) {
-  api = window.ALIST.api
+if (window.OPENLIST_CONFIG.api) {
+  api = window.OPENLIST_CONFIG.api
 }
 if (api === "/") {
   api = location.origin + base_path
@@ -24,7 +24,3 @@ if (api === "/") {
 if (api.endsWith("/")) {
   api = api.slice(0, -1)
 }
-
-export const monaco_cdn =
-  window.ALIST.monaco_cdn ||
-  "https://cdn.jsdelivr.net/npm/monaco-editor@0.33.0/min/vs"

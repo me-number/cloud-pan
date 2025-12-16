@@ -37,6 +37,12 @@ export const initialLocalSettings = [
     options: ["none", "visible"],
   },
   {
+    key: "show_count_msg",
+    default: "none",
+    type: "select",
+    options: ["none", "visible"],
+  },
+  {
     key: "position_of_header_navbar",
     default: "static",
     type: "select",
@@ -58,6 +64,12 @@ export const initialLocalSettings = [
     default: "direct",
     type: "select",
     options: ["direct", "dblclick", "disable_while_checked"],
+    hidden: false,
+  },
+  {
+    key: "editor_font_size",
+    default: "14",
+    type: "number",
   },
 ]
 export type LocalSetting = (typeof initialLocalSettings)[number]

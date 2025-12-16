@@ -28,14 +28,8 @@ import { me } from "~/store"
 
 export interface TaskNameAnalyzer {
   regex: RegExp
-  title: (matches: RegExpMatchArray, task?: TaskInfo) => string
-  attrs: {
-    [attr: string]: (
-      matches: RegExpMatchArray,
-      task?: TaskInfo,
-    ) => JSX.Element | undefined
-  }
-  statusText?: (task: TaskInfo) => JSX.Element | string | undefined
+  title: (matches: RegExpMatchArray) => string
+  attrs: { [attr: string]: (matches: RegExpMatchArray) => JSX.Element }
 }
 
 export interface TasksProps {
@@ -152,8 +146,6 @@ export const Tasks = (props: TasksProps) => {
   const [retryFailedLoading, retryFailed] = useFetch(
     (): PEmptyResp => r.post(`/task/${props.type}/retry_failed`),
   )
-  console.log("props", props.type)
-
   const [regexFilterValue, setRegexFilterValue] = createSignal("")
   const [regexFilter, setRegexFilter] = createSignal(new RegExp(""))
   const [regexCompileFailed, setRegexCompileFailed] = createSignal(false)

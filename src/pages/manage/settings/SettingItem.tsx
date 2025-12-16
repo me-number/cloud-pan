@@ -23,24 +23,9 @@ import { useT } from "~/hooks"
 import { Flag, SettingItem, Type } from "~/types"
 import { TiDelete } from "solid-icons/ti"
 
-// 角色数字到字符串的映射
-const getRoleString = (value: string): string => {
-  switch (value) {
-    case "0":
-      return "general"
-    case "1":
-      return "guest"
-    case "2":
-      return "admin"
-    default:
-      return value
-  }
-}
-
 export type ItemProps = SettingItem & {
   onChange?: (value: string) => void
   onDelete?: () => void
-  // value: () => string;
   hideLabel?: boolean
   w?: string
 }
@@ -72,7 +57,6 @@ const Item = (props: ItemProps) => {
           <Input
             type={props.type === Type.Number ? "number" : ""}
             id={props.key}
-            // value={props.value()}
             value={props.value}
             onInput={(e) => props.onChange?.(e.currentTarget.value)}
             readOnly={props.flag === Flag.READONLY}
@@ -81,11 +65,9 @@ const Item = (props: ItemProps) => {
         <Match when={props.type === Type.Bool}>
           <HopeSwitch
             id={props.key}
-            defaultChecked={props.value === "true"}
-            // checked={props.value() === "true"}
-            onChange={(e: any) =>
-              // props.onChange?.(props.value() === "true" ? "false" : "true")
-              props.onChange?.(e.currentTarget.checked ? "true" : "false")
+            checked={props.value === "true"}
+            onChange={(e: { currentTarget: HTMLInputElement }) =>
+              props.onChange?.(e.currentTarget?.checked ? "true" : "false")
             }
             readOnly={props.flag === Flag.READONLY}
           />
@@ -94,7 +76,6 @@ const Item = (props: ItemProps) => {
           <Textarea
             id={props.key}
             value={props.value}
-            // value={props.value()}
             onChange={(e) => props.onChange?.(e.currentTarget.value)}
             readOnly={props.flag === Flag.READONLY}
           />
@@ -102,16 +83,8 @@ const Item = (props: ItemProps) => {
         <Match when={props.type === Type.Select}>
           <Select
             id={props.key}
-            value={
-              props.key === "default_role"
-                ? getRoleString(props.value)
-                : props.value
-            }
-            onChange={(e) =>
-              props.onChange?.(
-                props.key === "default_role" ? getRoleString(e) : e,
-              )
-            }
+            value={props.value}
+            onChange={(e) => props.onChange?.(e)}
             readOnly={props.flag === Flag.READONLY}
           >
             <SelectTrigger>
@@ -125,10 +98,7 @@ const Item = (props: ItemProps) => {
                   {(item) => (
                     <SelectOption value={item}>
                       <SelectOptionText>
-                        {/* {t(`settings.${props.key}s.${item}`)} */}
-                        {props.key === "default_role"
-                          ? t(`${item}`)
-                          : t(`settings.${props.key}s.${item}`)}
+                        {t(`settings.${props.key}s.${item}`)}
                       </SelectOptionText>
                       <SelectOptionIndicator />
                     </SelectOption>

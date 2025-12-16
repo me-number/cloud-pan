@@ -1,5 +1,5 @@
 import { Box } from "@hope-ui/solid"
-import { createSignal, onCleanup, onMount } from "solid-js"
+import { createMemo, createSignal, onCleanup, onMount } from "solid-js"
 import { useRouter, useLink } from "~/hooks"
 import { getMainColor, getSettingBool, objStore } from "~/store"
 import { ObjType } from "~/types"
@@ -9,6 +9,7 @@ import { type Option } from "artplayer/types/option"
 import { type Setting } from "artplayer/types/setting"
 import { type Events } from "artplayer/types/events"
 import artplayerPluginDanmuku from "artplayer-plugin-danmuku"
+import { type Option as DanmukuOption } from "artplayer-plugin-danmuku"
 import artplayerPluginAss from "~/components/artplayer-plugin-ass"
 import mpegts from "mpegts.js"
 import Hls from "hls.js"
@@ -16,30 +17,30 @@ import { currentLang } from "~/app/i18n"
 import { AutoHeightPlugin, VideoBox } from "./video_box"
 import { ArtPlayerIconsSubtitle } from "~/components/icons"
 import { useNavigate } from "@solidjs/router"
+import "./artplayer.css"
 
 const Preview = () => {
   const { pathname, searchParams } = useRouter()
   const { proxyLink } = useLink()
   const navigate = useNavigate()
-  let videos = objStore.objs.filter((obj) => obj.type === ObjType.VIDEO)
-  if (videos.length === 0) {
-    videos = [objStore.obj]
-  }
+  const videos = createMemo(() =>
+    objStore.objs.filter((obj) => obj.type === ObjType.VIDEO),
+  )
   const next_video = () => {
-    const index = videos.findIndex((f) => f.name === objStore.obj.name)
-    if (index < videos.length - 1) {
+    const index = videos().findIndex((f) => f.name === objStore.obj.name)
+    if (index < videos().length - 1) {
       navigate(
-        pathJoin(pathDir(location.pathname), videos[index + 1].name) +
+        pathJoin(pathDir(location.pathname), videos()[index + 1].name) +
           "?auto_fullscreen=" +
           player.fullscreen,
       )
     }
   }
   const previous_video = () => {
-    const index = videos.findIndex((f) => f.name === objStore.obj.name)
+    const index = videos().findIndex((f) => f.name === objStore.obj.name)
     if (index > 0) {
       navigate(
-        pathJoin(pathDir(location.pathname), videos[index - 1].name) +
+        pathJoin(pathDir(location.pathname), videos()[index - 1].name) +
           "?auto_fullscreen=" +
           player.fullscreen,
       )
@@ -53,7 +54,7 @@ const Preview = () => {
     container: "#video-player",
     url: objStore.raw_url,
     title: objStore.obj.name,
-    volume: 0.5,
+    volume: 1.0,
     autoplay: getSettingBool("video_autoplay"),
     autoSize: false,
     autoMini: true,
@@ -277,19 +278,17 @@ const Preview = () => {
   if (danmu) {
     option.plugins?.push(
       artplayerPluginDanmuku({
-        danmuku: proxyLink(danmu, true),
         speed: 5,
         opacity: 1,
         fontSize: 25,
-        color: "#FFFFFF",
         mode: 0,
-        margin: [0, "0%"],
         antiOverlap: false,
         synchronousPlayback: false,
-        lockTime: 5,
-        maxLength: 100,
         theme: "dark",
         heatmap: true,
+        ...JSON.parse(localStorage.getItem("danmuku_config") || "{}"),
+        emitter: false,
+        danmuku: proxyLink(danmu, true),
       }),
     )
   }
@@ -299,16 +298,45 @@ const Preview = () => {
     switch (searchParams["auto_fullscreen"]) {
       case "true":
         auto_fullscreen = true
-        break
       case "false":
         auto_fullscreen = false
-        break
       default:
         auto_fullscreen = false
     }
     player.on("ready", () => {
       player.fullscreen = auto_fullscreen
     })
+    if (danmu) {
+      player.on("artplayerPluginDanmuku:config", (option) => {
+        const {
+          speed,
+          margin,
+          opacity,
+          mode,
+          modes,
+          fontSize,
+          antiOverlap,
+          synchronousPlayback,
+          heatmap,
+          visible,
+        } = option as DanmukuOption
+        localStorage.setItem(
+          "danmuku_config",
+          JSON.stringify({
+            speed,
+            margin,
+            opacity,
+            mode,
+            modes,
+            fontSize,
+            antiOverlap,
+            synchronousPlayback,
+            heatmap,
+            visible,
+          }),
+        )
+      })
+    }
     player.on("video:ended", () => {
       if (!autoNext()) return
       next_video()

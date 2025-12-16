@@ -2,10 +2,11 @@ import naturalSort from "typescript-natural-sort"
 import { cookieStorage, createStorageSignal } from "@solid-primitives/storage"
 import { createMemo, createSignal } from "solid-js"
 import { createStore, produce } from "solid-js/store"
-import { Obj, StoreObj } from "~/types"
-import { bus, log, trimBase } from "~/utils"
+import { Obj, ObjType, StoreObj } from "~/types"
+import { bus, log } from "~/utils"
 import { keyPressed } from "./key-event"
 import { local } from "./local_settings"
+import { useT } from "~/hooks"
 
 export enum State {
   Initial, // Initial state
@@ -16,39 +17,26 @@ export enum State {
   File, // File state
   NeedPassword,
 }
-
-const [objStore, setObjStore] = createStore<{
-  obj: Obj
-  raw_url: string
-  related: Obj[]
-
-  objs: StoreObj[]
-  total: number
-  write?: boolean
-
-  readme: string
-  header: string
-  provider: string
-  // pageIndex: number;
-  // pageSize: number;
-  state: State
-  err: string
-}>({
+const initialObjStore = {
   obj: {} as Obj,
   raw_url: "",
-  related: [],
+  related: [] as Obj[],
 
-  objs: [],
+  objs: [] as StoreObj[],
   total: 0,
 
   readme: "",
   header: "",
   provider: "",
-  // pageIndex: 1,
-  // pageSize: 50,
+  direct_upload_tools: <string[] | undefined>undefined,
   state: State.Initial,
   err: "",
-})
+}
+const [objStore, setObjStore] = createStore<
+  typeof initialObjStore & {
+    write?: boolean
+  }
+>(initialObjStore)
 
 const setObjs = (objs: Obj[]) => {
   lastChecked.start = -1
@@ -89,6 +77,8 @@ export const ObjStore = {
   //   setObjStore("write", resp.data.write);
   // },
   setState: (state: State) => setObjStore("state", state),
+  setDirectUploadTools: (tools?: string[]) =>
+    setObjStore("direct_upload_tools", tools),
   setErr: (err: string) => setObjStore("err", err),
 }
 
@@ -96,7 +86,6 @@ export type OrderBy = "name" | "size" | "modified"
 
 export const sortObjs = (orderBy: OrderBy, reverse?: boolean) => {
   log("sort:", orderBy, reverse)
-  naturalSort.insensitive = true
   setObjStore(
     "objs",
     produce((objs) =>
@@ -203,11 +192,6 @@ const layoutRecord: Record<string, LayoutType> = (() => {
 })()
 
 bus.on("pathname", (p) => setPathname(p))
-
-export const getCurrentPath = () => {
-  return trimBase(pathname())
-}
-
 const [_layout, _setLayout] = createSignal<LayoutType>(
   layoutRecord[pathname()] || local["global_default_layout"],
 )
@@ -218,7 +202,6 @@ export const layout = () => {
 }
 export const setLayout = (layout: LayoutType) => {
   layoutRecord[pathname()] = layout
-  console.log("setLayout", layoutRecord)
   localStorage.setItem("layoutRecord", JSON.stringify(layoutRecord))
   _setLayout(layout)
 }
@@ -243,3 +226,55 @@ export const setPassword = (password: string) => {
   _setPassword(password)
   cookieStorage.setItem("browser-password", password)
 }
+
+const getCountStr = (
+  objs: StoreObj[],
+  prefix: string,
+  filterType?: ObjType,
+) => {
+  const t = useT()
+
+  if (filterType) {
+    objs = objs.filter((obj) => obj.is_dir || obj.type === filterType)
+  }
+
+  if (objs.length === 0) return ""
+
+  const folders = objs.filter((o) => o.is_dir).length
+  const files = objs.length - folders
+  const vars = { folders: folders.toString(), files: files.toString() }
+  const key =
+    folders && files
+      ? `${prefix}`
+      : folders
+        ? `${prefix}_folders`
+        : files
+          ? `${prefix}_files`
+          : ""
+  return key ? t(`home.obj.count.${key}`, vars) : ""
+}
+
+export const countMsg = (filterType?: ObjType) =>
+  getCountStr(objStore.objs, "count", filterType)
+
+export const selectedMsg = (filterType?: ObjType) => {
+  const selectedList = selectedObjs()
+  const isSelected = selectedList.length > 0
+
+  return isSelected ? getCountStr(selectedList, "selected", filterType) : ""
+}
+
+export const smartCountMsg = (filterType?: ObjType) => {
+  const selectedList = selectedObjs()
+  const isSelected = selectedList.length > 0
+
+  return isSelected
+    ? getCountStr(selectedList, "selected", filterType)
+    : countMsg(filterType)
+}
+
+export const [uploadConfig, setUploadConfig] = createStore({
+  asTask: false,
+  overwrite: false,
+  rapid: true,
+})

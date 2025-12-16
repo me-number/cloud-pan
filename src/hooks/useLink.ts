@@ -1,7 +1,15 @@
-import { objStore, selectedObjs, State } from "~/store"
-import { Obj } from "~/types"
-import { api, encodePath, pathDir, pathJoin, standardizePath } from "~/utils"
+import { objStore, selectedObjs, State, me } from "~/store"
+import { Obj, ArchiveObj } from "~/types"
+import {
+  base_path,
+  api,
+  encodePath,
+  pathDir,
+  pathJoin,
+  standardizePath,
+} from "~/utils"
 import { useRouter, useUtil } from "."
+import { cookieStorage } from "@solid-primitives/storage"
 
 type URLType = "preview" | "direct" | "proxy"
 
@@ -10,33 +18,53 @@ export const getLinkByDirAndObj = (
   dir: string,
   obj: Obj,
   type: URLType = "direct",
+  isShare: boolean,
   encodeAll?: boolean,
 ) => {
-  if (type !== "preview") {
-    dir = pathJoin("/", dir)
-  }
+  if (type !== "preview")
+    dir = isShare
+      ? dir.substring(3) /* remove /@s */
+      : pathJoin(me().base_path, dir)
+
   dir = standardizePath(dir, true)
   let path = `${dir}/${obj.name}`
   path = encodePath(path, encodeAll)
   let host = api
-  let prefix = type === "direct" ? "/d" : "/p"
+  let prefix = isShare ? "/sd" : type === "direct" ? "/d" : "/p"
   if (type === "preview") {
     prefix = ""
-    if (!api.startsWith(location.origin)) host = location.origin
+    if (!api.startsWith(location.origin + base_path))
+      host = location.origin + base_path
+  }
+  const { inner_path, archive } = obj as ArchiveObj
+  if (archive) {
+    prefix = "/ae"
+    path = `${dir}/${archive.name}`
+    path = encodePath(path, encodeAll)
   }
   let ans = `${host}${prefix}${path}`
-  if (type !== "preview" && obj.sign) {
+  if (type !== "preview" && !isShare && obj.sign) {
     ans += `?sign=${obj.sign}`
+  }
+  if (type !== "preview" && isShare) {
+    const pwd = cookieStorage.getItem("browser-password") || ""
+    if (pwd) {
+      ans += `?pwd=${pwd}`
+    }
+  }
+  if (archive) {
+    let inner = `${inner_path}/${obj.name}`
+    ans += `${ans.includes("?") ? "&" : "?"}inner=${encodePath(inner, encodeAll)}`
   }
   return ans
 }
 
 // get download link by current state and pathname
 export const useLink = () => {
-  const { pathname } = useRouter()
+  const { pathname, isShare } = useRouter()
   const getLinkByObj = (obj: Obj, type?: URLType, encodeAll?: boolean) => {
     const dir = objStore.state !== State.File ? pathname() : pathDir(pathname())
-    return getLinkByDirAndObj(dir, obj, type, encodeAll)
+    return getLinkByDirAndObj(dir, obj, type, isShare(), encodeAll)
   }
   const rawLink = (obj: Obj, encodeAll?: boolean) => {
     return getLinkByObj(obj, "direct", encodeAll)

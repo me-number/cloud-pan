@@ -1,12 +1,11 @@
 import mitt from "mitt"
 
 type Events = {
+  to: string
   gallery: string
-  refresh: void
-  refresh_labels: void
   tool: string
   pathname: string
-  to: string
+  extract: string
 }
 
 export const bus = mitt<Events>()

@@ -6,9 +6,9 @@
   "save": "Save",
   "update": "Update",
   "copied": "Copied",
-  "delete_success": "Deleted successfully",
-  "save_success": "Saved successfully",
-  "update_success": "Updated successfully",
+  "delete_success": "Deleted Successfully",
+  "save_success": "Saved Successfully",
+  "update_success": "Updated Successfully",
   "choose": "Choose",
   "confirm": "Confirm",
   "cancel": "Cancel",
@@ -17,8 +17,7 @@
   "yes": "Yes",
   "no": "No",
   "clear": "Clear",
-  "choose_folder": "Select folder",
-  "please_click_to_select": "Please click the text to select",
+  "choose_folder": "Select Folder",
   "choose_or_input_path": "Select folder or input path",
   "disable": "Disable",
   "enable": "Enable",
@@ -29,8 +28,7 @@
   "close": "Close",
   "no_support_now": "Not currently supported",
   "empty_input": "Please enter",
+  "invalid_filename_chars": "Filename cannot contain: / \\ ? < > * : | \"",
   "name": "Name",
-  "refresh_success": "Refresh successfully",
-  "refresh_failed": "Refresh failed",
-  "required": "required"
+  "go_to_storages": "Go to Storages"
 }

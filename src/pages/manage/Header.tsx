@@ -20,8 +20,7 @@ import { SwitchColorMode, SwitchLanguageWhite } from "~/components"
 import { useFetch, useRouter, useT } from "~/hooks"
 import { SideMenu } from "./SideMenu"
 import { side_menu_items } from "./sidemenu_items"
-import { handleResp, notify, r } from "~/utils"
-import { clearUserData } from "~/utils/auth"
+import { changeToken, handleResp, notify, r } from "~/utils"
 import { PResp } from "~/types"
 const { isOpen, onOpen, onClose } = createDisclosure()
 const [logOutReqLoading, logOutReq] = useFetch(
@@ -33,7 +32,7 @@ const Header = () => {
   const { to } = useRouter()
   const logOut = async () => {
     handleResp(await logOutReq(), () => {
-      clearUserData()
+      changeToken()
       notify.success(t("manage.logout_success"))
       to(`/@login?redirect=${encodeURIComponent(location.pathname)}`)
     })

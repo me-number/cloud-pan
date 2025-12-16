@@ -15,20 +15,17 @@ import {
   SelectTrigger,
   SelectValue,
   Icon,
-  Button,
-  VStack,
-  Text,
 } from "@hope-ui/solid"
 import { SwitchColorMode } from "./SwitchColorMode"
-import { ComponentProps, For, mergeProps, Show } from "solid-js"
+import { ComponentProps, For, mergeProps, Show, JSXElement } from "solid-js"
 import { AiOutlineFullscreen, AiOutlineFullscreenExit } from "solid-icons/ai"
 import { hoverColor } from "~/utils"
-import { useRouter, useT } from "~/hooks"
 
 export const Error = (props: {
   msg: string
   disableColor?: boolean
   h?: string
+  actions?: JSXElement
 }) => {
   const merged = mergeProps(
     {
@@ -36,36 +33,6 @@ export const Error = (props: {
     },
     props,
   )
-
-  const { to } = useRouter()
-  const t = useT()
-
-  // 检查是否是存储错误
-  const isStorageError = () => {
-    return (
-      props.msg.includes("storage not found") ||
-      props.msg.includes("please add a storage")
-    )
-  }
-
-  // 检查是否是设备数上限错误
-  const isTooManyDevicesError = () => {
-    return props.msg.includes("too many active devices")
-  }
-
-  // 检查是否是会话失效错误
-  const isSessionInactiveError = () => {
-    return props.msg.includes("session inactive")
-  }
-
-  const handleGoToStorages = () => {
-    to("/@manage/storages")
-  }
-
-  const handleGoToLogin = () => {
-    to(`/@login?redirect=${encodeURIComponent(window.location.pathname)}`)
-  }
-
   return (
     <Center h={merged.h} p="$2" flexDirection="column">
       <Box
@@ -74,44 +41,23 @@ export const Error = (props: {
         py="$6"
         bgColor={useColorModeValue("white", "$neutral3")()}
       >
-        <VStack spacing="$4" textAlign="center">
-          <Show when={!isTooManyDevicesError() && !isSessionInactiveError()}>
-            <Heading
-              css={{
-                wordBreak: "break-all",
-              }}
-            >
-              {props.msg}
-            </Heading>
-          </Show>
-
-          <Show when={isStorageError()}>
-            <Button onClick={handleGoToStorages} size="md">
-              {t("home.go_to_storages")}
-            </Button>
-          </Show>
-
-          <Show when={isTooManyDevicesError()}>
-            <VStack spacing="$2">
-              <Text fontSize="sm">{t("session.too_many_devices")}</Text>
-            </VStack>
-          </Show>
-
-          <Show when={isSessionInactiveError()}>
-            <VStack spacing="$2">
-              <Text fontSize="sm">{t("session.session_inactive")}</Text>
-              <Button onClick={handleGoToLogin} size="md" colorScheme="accent">
-                {t("global.go_login")}
-              </Button>
-            </VStack>
-          </Show>
-
-          <Show when={!props.disableColor}>
-            <Flex mt="$2" justifyContent="end">
-              <SwitchColorMode />
-            </Flex>
-          </Show>
-        </VStack>
+        <Heading
+          css={{
+            wordBreak: "break-all",
+          }}
+        >
+          {props.msg}
+        </Heading>
+        <Show when={props.actions}>
+          <Flex mt="$4" justifyContent="center">
+            {props.actions}
+          </Flex>
+        </Show>
+        <Show when={!props.disableColor}>
+          <Flex mt="$2" justifyContent="end">
+            <SwitchColorMode />
+          </Flex>
+        </Show>
       </Box>
     </Center>
   )

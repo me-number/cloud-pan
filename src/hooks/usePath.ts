@@ -42,49 +42,6 @@ export const resetGlobalPage = () => {
 }
 export const usePath = () => {
   const { pathname, to, searchParams } = useRouter()
-
-  // 统一的路径处理函数
-  const getProcessedPath = (path: string): string => {
-    if (path === "/") return "/"
-    // 如果路径已经包含了权限路径，直接返回
-
-    const userPermissions = me().permissions || []
-    for (const perm of userPermissions) {
-      if (path.startsWith(perm.path)) {
-        return path
-      }
-    }
-
-    // 查找最匹配的权限路径
-    let bestMatch = userPermissions[0]
-    let maxMatchLength = 0
-
-    for (const perm of userPermissions) {
-      const cleanPath = path.replace(/^\/|\/$/g, "")
-      const cleanPermPath = perm.path.replace(/^\/|\/$/g, "")
-
-      if (
-        cleanPath.includes(cleanPermPath) &&
-        cleanPermPath.length > maxMatchLength
-      ) {
-        bestMatch = perm
-        maxMatchLength = cleanPermPath.length
-      }
-    }
-
-    // 如果找到匹配的权限路径，返回完整路径
-    if (bestMatch && maxMatchLength > 0) {
-      return pathJoin(bestMatch.path, path)
-    }
-
-    // 如果没有找到匹配，使用第一个权限路径
-    if (userPermissions.length > 0) {
-      return pathJoin(userPermissions[0].path, path)
-    }
-
-    return path
-  }
-
   const [, getObj] = useFetch((path: string) =>
     fsGet(
       path,
@@ -109,10 +66,9 @@ export const usePath = () => {
         index: arg?.index,
         size: arg?.size,
       }
-      const processedPath = getProcessedPath(arg?.path || "/")
-
+      // setSearchParams(page);
       return fsList(
-        processedPath,
+        arg?.path,
         password(),
         page.index,
         page.size,
@@ -146,54 +102,20 @@ export const usePath = () => {
     rp?: boolean,
     force?: boolean,
   ) => {
+    cancelObj?.()
+    cancelList?.()
     retry_pass = rp ?? false
     ObjStore.setErr("")
-
-    if (first_fetch) {
-      first_fetch = false
-    }
-
-    const userPermissions = me().permissions || []
-    if (path === "/") {
-      // 如果有权限路径是"/"，直接获取文件列表
-      if (userPermissions.some((perm) => perm.path === "/")) {
-        return handleFolder("/", index, undefined, undefined, force)
-      }
-      // 否则显示权限目录列表
-      if (userPermissions.length > 0) {
-        const permDirs = userPermissions.map((perm) => ({
-          name: perm.path.split("/").filter(Boolean).pop() || perm.path,
-          size: 0,
-          is_dir: true,
-          modified: new Date().toISOString(),
-          created: new Date().toISOString(),
-          sign: "",
-          thumb: "",
-          type: 1, // FOLDER
-          path: perm.path,
-          selected: false,
-        }))
-
-        ObjStore.setObjs(permDirs)
-        ObjStore.setTotal(permDirs.length)
-        ObjStore.setState(State.Folder)
-      } else {
-        ObjStore.setState(State.Initial)
-      }
-      return Promise.resolve()
-    }
-
     if (hasHistory(path, index)) {
+      log(`handle [${getHistoryKey(path, index)}] from history`)
       return recoverHistory(path, index)
-    }
-
-    // 检查路径是否已知为目录
-    if (IsDirRecord[path]) {
+    } else if (IsDirRecord[path]) {
+      log(`handle [${getHistoryKey(path, index)}] as folder`)
       return handleFolder(path, index, undefined, undefined, force)
+    } else {
+      log(`handle [${getHistoryKey(path, index)}] as obj`)
+      return handleObj(path, index)
     }
-
-    // 如果不知道是文件还是目录，先调用fsget接口判断
-    return handleObj(path, index)
   }
 
   // handle enter obj that don't know if it is dir or file
@@ -227,6 +149,7 @@ export const usePath = () => {
     size?: number,
     append = false,
     force?: boolean,
+    onlyList = false,
   ) => {
     if (!size) {
       size = pagination.size
@@ -234,7 +157,8 @@ export const usePath = () => {
     if (size !== undefined && pagination.type === "all") {
       size = undefined
     }
-    ObjStore.setState(append ? State.FetchingMore : State.FetchingObjs)
+    !onlyList &&
+      ObjStore.setState(append ? State.FetchingMore : State.FetchingObjs)
     const resp = await getObjs({ path, index, size, force })
     handleRespWithoutNotify(
       resp,
@@ -246,12 +170,14 @@ export const usePath = () => {
           ObjStore.setObjs(data.content ?? [])
           ObjStore.setTotal(data.total)
         }
+        if (onlyList) {
+          return
+        }
         ObjStore.setReadme(data.readme)
         ObjStore.setHeader(data.header)
         ObjStore.setWrite(data.write)
         ObjStore.setProvider(data.provider)
-        // 设置路径为目录
-        setPathAs(path)
+        ObjStore.setDirectUploadTools(data.direct_upload_tools)
         ObjStore.setState(State.Folder)
       },
       handleErr,
@@ -259,99 +185,35 @@ export const usePath = () => {
   }
 
   const handleErr = (msg: string, code?: number) => {
-    const currentPath = pathname()
-    const userPermissions = me().permissions || []
-    // 如果是403权限错误，返回到根目录并显示权限目录
     if (code === 403) {
-      if (currentPath === "/" || userPermissions.length === 0) {
-        const permDirs = userPermissions.map((perm) => ({
-          name: perm.path.split("/").filter(Boolean).pop() || perm.path,
-          size: 0,
-          is_dir: true,
-          modified: new Date().toISOString(),
-          created: new Date().toISOString(),
-          sign: "",
-          thumb: "",
-          type: 1, // FOLDER
-          path: perm.path,
-          selected: false,
-        }))
-
-        ObjStore.setObjs(permDirs)
-        ObjStore.setTotal(permDirs.length)
-        ObjStore.setState(State.Folder)
-        to("/")
-      } else {
-        ObjStore.setState(State.NeedPassword)
-      }
-      return
-    }
-
-    // 如果是存储未找到错误
-    if (
-      msg.includes("storage not found") ||
-      msg.includes("please add a storage")
-    ) {
-      ObjStore.setErr(msg)
-      ObjStore.setState(State.Initial)
-      return
-    }
-
-    // 如果是根路径访问，显示所有权限目录
-    if (currentPath === "/") {
-      if (userPermissions.length > 0) {
-        const permDirs = userPermissions.map((perm) => ({
-          name: perm.path.split("/").filter(Boolean).pop() || perm.path,
-          size: 0,
-          is_dir: true,
-          modified: new Date().toISOString(),
-          created: new Date().toISOString(),
-          sign: "",
-          thumb: "",
-          type: 1, // FOLDER
-          path: perm.path,
-          selected: false,
-        }))
-
-        ObjStore.setObjs(permDirs)
-        ObjStore.setTotal(permDirs.length)
-        ObjStore.setState(State.Folder)
-        return
+      ObjStore.setState(State.NeedPassword)
+      if (retry_pass) {
+        notify.error(msg)
       }
     } else {
-      // 检查当前路径是否是某个权限路径的子路径
-      const matchedPerm = userPermissions.find((perm) => {
-        // 移除开头的斜杠以便比较
-        const cleanCurrentPath = currentPath.replace(/^\//, "")
-        const cleanPermPath = perm.path.replace(/^\//, "")
-        return (
-          cleanCurrentPath.includes(cleanPermPath) ||
-          cleanPermPath.includes(cleanCurrentPath)
-        )
-      })
-
-      // 如果找到匹配的权限路径，重定向到正确的完整路径
-      if (matchedPerm) {
-        const pathParts = currentPath.split("/").filter(Boolean)
-        const permParts = matchedPerm.path.split("/").filter(Boolean)
-
-        // 如果当前路径是权限路径的一部分，重定向到完整的权限路径
-        if (pathParts.some((part) => permParts.includes(part))) {
-          to(matchedPerm.path)
-          return
-        }
+      const basePath = me().base_path
+      if (
+        first_fetch &&
+        basePath != "/" &&
+        pathname().includes(basePath) &&
+        msg.endsWith("object not found")
+      ) {
+        first_fetch = false
+        to(pathname().replace(basePath, ""))
+        return
+      }
+      if (code === undefined || code >= 0) {
+        ObjStore.setErr(msg)
       }
     }
-    ObjStore.setErr(msg)
-    ObjStore.setState(State.Initial)
   }
-
   const loadMore = () => {
     return handleFolder(pathname(), globalPage + 1, undefined, true)
   }
   return {
-    handlePathChange: handlePathChange,
-    setPathAs: setPathAs,
+    handlePathChange,
+    handleFolder,
+    setPathAs,
     refresh: async (retry_pass?: boolean, force?: boolean) => {
       const path = pathname()
       const scroll = window.scrollY
@@ -371,7 +233,7 @@ export const usePath = () => {
       }
       window.scroll({ top: scroll, behavior: "smooth" })
     },
-    loadMore: loadMore,
+    loadMore,
     allLoaded: () => globalPage >= Math.ceil(objStore.total / pagination.size),
   }
 }

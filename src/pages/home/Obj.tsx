@@ -1,4 +1,4 @@
-import { Text, useColorModeValue, VStack } from "@hope-ui/solid"
+import { Text, useColorModeValue, VStack, Button } from "@hope-ui/solid"
 import {
   createEffect,
   createMemo,
@@ -6,6 +6,7 @@ import {
   lazy,
   Match,
   on,
+  Show,
   Suspense,
   Switch,
 } from "solid-js"
@@ -18,7 +19,9 @@ import {
   recordHistory,
   setPassword,
   /*layout,*/ State,
+  me,
 } from "~/store"
+import { UserMethods } from "~/types"
 
 const Folder = lazy(() => import("./folder/Folder"))
 const File = lazy(() => import("./file/File"))
@@ -32,7 +35,7 @@ export { objBoxRef }
 export const Obj = () => {
   const t = useT()
   const cardBg = useColorModeValue("white", "$neutral3")
-  const { pathname, searchParams } = useRouter()
+  const { pathname, searchParams, isShare, to } = useRouter()
   const { handlePathChange, refresh } = usePath()
   const pagination = getPagination()
   const page = createMemo(() => {
@@ -44,15 +47,34 @@ export const Obj = () => {
   let lastPage: number | undefined
   createEffect(
     on([pathname, page], async ([pathname, page]) => {
+      if (searchParams["pwd"]) {
+        setPassword(searchParams["pwd"])
+      }
       if (lastPathname) {
         recordHistory(lastPathname, lastPage)
       }
       lastPathname = pathname
       lastPage = page
       useObjTitle()
-
       await handlePathChange(pathname, page)
     }),
+  )
+
+  const isStorageError = createMemo(() => {
+    const err = objStore.err
+    return (
+      err.includes("storage not found") || err.includes("please add a storage")
+    )
+  })
+
+  const shouldShowStorageButton = createMemo(() => {
+    return isStorageError() && UserMethods.is_admin(me())
+  })
+
+  const storageErrorActions = () => (
+    <Button colorScheme="accent" onClick={() => to("/@manage/storages")}>
+      {t("global.go_to_storages")}
+    </Button>
   )
   return (
     <VStack
@@ -68,7 +90,13 @@ export const Obj = () => {
       <Suspense fallback={<FullLoading />}>
         <Switch>
           <Match when={objStore.err}>
-            <Error msg={objStore.err} disableColor />
+            <Error
+              msg={objStore.err}
+              disableColor
+              actions={
+                shouldShowStorageButton() ? storageErrorActions() : undefined
+              }
+            />
           </Match>
           <Match
             when={[State.FetchingObj, State.FetchingObjs].includes(
@@ -82,21 +110,27 @@ export const Obj = () => {
           </Match>
           <Match when={objStore.state === State.NeedPassword}>
             <Password
-              title={t("home.input_password")}
+              title={
+                isShare()
+                  ? t("shares.input_password")
+                  : t("home.input_password")
+              }
               password={password}
               setPassword={setPassword}
               enterCallback={() => refresh(true)}
             >
-              <Text>{t("global.have_account")}</Text>
-              <Text
-                color="$info9"
-                as={LinkWithBase}
-                href={`/@login?redirect=${encodeURIComponent(
-                  location.pathname,
-                )}`}
-              >
-                {t("global.go_login")}
-              </Text>
+              <Show when={!isShare()}>
+                <Text>{t("global.have_account")}</Text>
+                <Text
+                  color="$info9"
+                  as={LinkWithBase}
+                  href={`/@login?redirect=${encodeURIComponent(
+                    location.pathname,
+                  )}`}
+                >
+                  {t("global.go_login")}
+                </Text>
+              </Show>
             </Password>
           </Match>
           <Match

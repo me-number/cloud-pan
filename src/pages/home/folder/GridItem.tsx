@@ -1,23 +1,16 @@
-import { Badge, Box, Center, HStack, Icon, Text, VStack } from "@hope-ui/solid"
-import { Motion } from "@motionone/solid"
+import { Center, VStack, Icon, Text } from "@hope-ui/solid"
+import { Motion } from "solid-motionone"
 import { useContextMenu } from "solid-contextmenu"
-import { batch, Show, createMemo } from "solid-js"
+import { batch, Show } from "solid-js"
 import { CenterLoading, LinkWithPush, ImageWithError } from "~/components"
-import { usePath, useRouter, useUtil, useT } from "~/hooks"
-import {
-  checkboxOpen,
-  getMainColor,
-  local,
-  selectIndex,
-  StoreObj,
-} from "~/store"
-import { Obj, ObjType } from "~/types"
-import { bus, hoverColor, normalizeStorageClass } from "~/utils"
+import { usePath, useRouter, useUtil } from "~/hooks"
+import { checkboxOpen, getMainColor, local, selectIndex } from "~/store"
+import { ObjType, StoreObj } from "~/types"
+import { bus, hoverColor } from "~/utils"
 import { getIconByObj } from "~/utils/icon"
 import { ItemCheckbox, useSelectWithMouse } from "./helper"
-import { pathJoin } from "~/utils/path"
 
-export const GridItem = (props: { obj: StoreObj & Obj; index: number }) => {
+export const GridItem = (props: { obj: StoreObj; index: number }) => {
   const { isHide } = useUtil()
   if (isHide(props.obj)) {
     return null
@@ -31,23 +24,9 @@ export const GridItem = (props: { obj: StoreObj & Obj; index: number }) => {
     />
   )
   const { show } = useContextMenu({ id: 1 })
-  const { pushHref, to, pathname } = useRouter()
-  const t = useT()
+  const { pushHref, to } = useRouter()
   const { openWithDoubleClick, toggleWithClick, restoreSelectionCache } =
     useSelectWithMouse()
-  const storageClassKey = createMemo(() =>
-    normalizeStorageClass(props.obj.storage_class),
-  )
-  const storageClassLabel = createMemo(() => {
-    const key = storageClassKey()
-    return key ? t(`home.storage_class.${key}`) : undefined
-  })
-
-  // 构建完整路径
-  const getFullPath = () => {
-    return pathJoin(pathname(), props.obj.name)
-  }
-
   return (
     <Motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -79,7 +58,7 @@ export const GridItem = (props: { obj: StoreObj & Obj; index: number }) => {
         on:dblclick={() => {
           if (!openWithDoubleClick()) return
           selectIndex(props.index, true, true)
-          to(getFullPath())
+          to(pushHref(props.obj.name))
         }}
         on:click={(e: MouseEvent) => {
           e.preventDefault()
@@ -88,7 +67,7 @@ export const GridItem = (props: { obj: StoreObj & Obj; index: number }) => {
           if (!restoreSelectionCache()) return
           if (toggleWithClick())
             return selectIndex(props.index, !props.obj.selected)
-          to(getFullPath())
+          to(pushHref(props.obj.name))
         }}
         onMouseEnter={() => {
           setPathAs(props.obj.name, props.obj.is_dir, true)
@@ -149,31 +128,19 @@ export const GridItem = (props: { obj: StoreObj & Obj; index: number }) => {
             />
           </Show>
         </Center>
-        <VStack spacing="$1" w="$full" alignItems="center">
-          <Text
-            css={{
-              whiteSpace: "nowrap",
-              textOverflow: "ellipsis",
-            }}
-            w="$full"
-            overflow="hidden"
-            textAlign="center"
-            fontSize="$sm"
-            title={props.obj.name}
-          >
-            {props.obj.name}
-          </Text>
-          <Show when={storageClassLabel()}>
-            <Badge
-              variant="subtle"
-              colorScheme="primary"
-              textTransform="none"
-              css={{ "font-size": "0.65rem" }}
-            >
-              {storageClassLabel()}
-            </Badge>
-          </Show>
-        </VStack>
+        <Text
+          css={{
+            whiteSpace: "nowrap",
+            textOverflow: "ellipsis",
+          }}
+          w="$full"
+          overflow="hidden"
+          textAlign="center"
+          fontSize="$sm"
+          title={props.obj.name}
+        >
+          {props.obj.name}
+        </Text>
       </VStack>
     </Motion.div>
   )

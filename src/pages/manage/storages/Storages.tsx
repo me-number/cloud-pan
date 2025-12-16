@@ -130,8 +130,10 @@ const Storages = () => {
         </Show>
         <HopeSwitch
           checked={layout() === "table"}
-          onChange={(e) => {
-            setLayout(e.currentTarget.checked ? "table" : "grid")
+          onChange={(e: Event) => {
+            setLayout(
+              (e.currentTarget as HTMLInputElement).checked ? "table" : "grid",
+            )
           }}
         >
           {t("storages.other.table_layout")}
@@ -160,7 +162,14 @@ const Storages = () => {
               <Thead>
                 <Tr>
                   <For
-                    each={["mount_path", "driver", "order", "status", "remark"]}
+                    each={[
+                      "mount_path",
+                      "driver",
+                      "order",
+                      "usage",
+                      "status",
+                      "remark",
+                    ]}
                   >
                     {(title) => <Th>{t(`storages.common.${title}`)}</Th>}
                   </For>

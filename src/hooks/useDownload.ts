@@ -20,13 +20,13 @@ function isNullOrUndefined(value: string | object): boolean {
 }
 
 async function getSaveDir(rpc_url: string, rpc_secret: string) {
-  let save_dir: string = "/downloads/alist"
+  let save_dir: string = "/downloads/openlist"
 
   const resp = await axios.post(rpc_url, {
     id: Math.random().toString(),
     jsonrpc: "2.0",
     method: "aria2.getGlobalOption",
-    params: ["token:" + rpc_secret ?? ""],
+    params: ["token:" + (rpc_secret ?? "")],
   })
   console.log(resp)
   if (resp.status === 200) {
@@ -40,7 +40,7 @@ async function getSaveDir(rpc_url: string, rpc_secret: string) {
 export const useDownload = () => {
   const { rawLinks } = useSelectedLink()
   const t = useT()
-  const { pathname } = useRouter()
+  const { pathname, isShare } = useRouter()
   return {
     batchDownloadSelected: () => {
       const urls = rawLinks(true)
@@ -63,6 +63,7 @@ export const useDownload = () => {
                 pathJoin(pathname(), pre),
                 obj,
                 "direct",
+                isShare(),
                 true,
               ),
               name: obj.name,
@@ -97,7 +98,7 @@ export const useDownload = () => {
         return
       }
       try {
-        let save_dir = "/downloads/alist"
+        let save_dir = "/downloads/openlist"
         // TODO: select dir, but it seems there is no way to get the full path
         // if (window.showDirectoryPicker) {
         //   const dirHandle = await window.showDirectoryPicker()
@@ -140,7 +141,7 @@ export const useDownload = () => {
                 jsonrpc: "2.0",
                 method: "aria2.addUri",
                 params: [
-                  "token:" + aria2_rpc_secret ?? "",
+                  "token:" + (aria2_rpc_secret ?? ""),
                   [res[key].url],
                   {
                     out: res[key].name,

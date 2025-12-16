@@ -1,3 +1,5 @@
+import { PageResp } from "~/types/resp"
+
 export enum ObjType {
   UNKNOWN,
   FOLDER,
@@ -17,16 +19,16 @@ export interface Obj {
   sign?: string
   thumb: string
   type: ObjType
-  path: string
-  tags?: string[]
-  id?: string
-  hashinfo?: string
-  storage_class?: string
-  children?: Obj[]
+  mount_details?: MountDetails
 }
 
 export type StoreObj = Obj & {
   selected?: boolean
+}
+
+export type ArchiveObj = Obj & {
+  inner_path?: string
+  archive?: Obj
 }
 
 export type RenameObj = {
@@ -51,7 +53,10 @@ export type ArchiveMeta = {
   sign: string
 }
 
-export type ArchiveList = {
-  content: Obj[]
-  total: number
+export type MountDetails = {
+  total_space?: number
+  free_space?: number
+  driver_name: string
 }
+
+export type ArchiveList = PageResp<Obj>

@@ -7,14 +7,14 @@ import "./markdown.css"
 import { For, Show, createEffect, createMemo, createSignal, on } from "solid-js"
 import { clsx } from "clsx"
 import { Anchor, Box, List, ListItem } from "@hope-ui/solid"
-import { useParseText, useRouter } from "~/hooks"
+import { useCDN, useParseText, useRouter } from "~/hooks"
 import { EncodingSelect } from "."
 import once from "just-once"
 import { pathDir, pathJoin, api, pathResolve } from "~/utils"
 import { createStorageSignal } from "@solid-primitives/storage"
 import { isMobile } from "~/utils/compatibility.js"
 import { useScrollListener } from "~/pages/home/toolbar/BackTop.jsx"
-import { Motion } from "@motionone/solid"
+import { Motion } from "solid-motionone"
 import { getMainColor, me } from "~/store"
 
 type TocItem = { indent: number; text: string; tagName: string; key: string }
@@ -152,18 +152,18 @@ function MarkdownToc(props: {
   )
 }
 
+const { katexCSSPath, mermaidJSPath } = useCDN()
+
 const insertKatexCSS = once(() => {
   const link = document.createElement("link")
   link.rel = "stylesheet"
-  link.href =
-    "https://registry.npmmirror.com/katex/0.16.11/files/dist/katex.min.css"
+  link.href = katexCSSPath()
   document.head.appendChild(link)
 })
 
 const insertMermaidJS = once(() => {
   const script = document.createElement("script")
-  script.src =
-    "https://registry.npmmirror.com/mermaid/11/files/dist/mermaid.min.js"
+  script.src = mermaidJSPath()
   document.body.appendChild(script)
 })
 
@@ -254,7 +254,9 @@ export function Markdown(props: {
       <Show when={show()}>
         <SolidMarkdown
           class={clsx("markdown-body", props.class)}
+          // @ts-ignore
           remarkPlugins={remarkPlugins()}
+          // @ts-ignore
           rehypePlugins={rehypePlugins()}
           children={md()}
         />
