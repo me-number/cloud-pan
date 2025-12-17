@@ -108,6 +108,25 @@ theme: anzhiyu
 deploy:
   type: ''
 
+feed:
+  enable: true
+  type:
+    - atom
+    - rss2
+  path:
+    - atom.xml
+    - rss2.xml
+  limit: 20
+  hub:
+  content:
+  content_limit: 140
+  content_limit_delim: ' '
+  order_by: -date
+  icon: 
+  autodiscovery: true
+
+
+  
 #envelope_comment
 #seehttps://akilar.top/posts/e2d3c450/
 envelope_comment:
