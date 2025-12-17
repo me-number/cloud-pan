@@ -3,21 +3,21 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: 孤影小站
+title: CloudBLOG
 subtitle: 'あ布鸢尾绽放'
 description: '分享知识'
 copyright: true
-copyright_author: joker2yue
-copyright_author_href: https://blog.joker2yue.cn/
+copyright_author: 张文涛
+copyright_author_href: https://zhang-wentao.cn/
 copyright_url: https://blog.joker2yue.cn/tags/狂神/
 keywords: '分享'
-author: 孤影
+author: 张文涛
 language: zh-CN
 timezone: ''
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
-url: http://example.com
+url: https://zhang-wentao.cn
 permalink: :year/:month/:day/:title/
 permalink_defaults:
 pretty_urls:
