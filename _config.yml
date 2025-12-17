@@ -102,4 +102,6 @@ theme: anzhiyu
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
-  type: ''
+  type: git
+  repository: git@github.com:me-number/me-number.github.io.git
+  branch: main
