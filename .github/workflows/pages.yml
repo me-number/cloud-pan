@@ -1,113 +1,77 @@
-name: Pages Project Automation
-description: Automate the setup, development, and build process for pages project
+name: Pages Project Automation Workflow
 
-inputs:
-  working-directory:
-    description: 'Working directory for the project (default: .)'
-    required: false
-    default: '.'
-  
-  run-dev-server:
-    description: 'Whether to run the development server (default: false)'
-    required: false
-    default: 'false'
-  
-  build-project:
-    description: 'Whether to build the project (default: true)'
-    required: false
-    default: 'true'
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 
-runs:
-  using: "composite"
-  steps:
-    - name: Change to pages directory
-      shell: bash
-      run: |
-        if [ ! -d "${{ inputs.working-directory }}/pages" ]; then
-          echo "Error: pages directory not found in ${{ inputs.working-directory }}"
-          exit 1
-        fi
-        cd ${{ inputs.working-directory }}/pages
-        echo "Changed to pages directory: $(pwd)"
+jobs:
+  setup-and-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Install project dependencies
-      shell: bash
-      run: |
-        cd ${{ inputs.working-directory }}/pages
-        echo "Installing project dependencies..."
-        npm install
-        echo "Dependencies installed successfully!"
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
 
-    - name: Start development server
-      if: inputs.run-dev-server == 'true'
-      shell: bash
-      run: |
-        cd ${{ inputs.working-directory }}/pages
-        echo "Starting development server..."
-        timeout 60 npm run dev || echo "Development server started (timeout reached)"
+      - name: Change to pages directory
+        run: |
+          if [ ! -d "pages" ]; then
+            echo "Error: pages directory not found"
+            exit 1
+          fi
+          cd pages
+          echo "Changed to pages directory: $(pwd)"
 
-    - name: Build production version
-      if: inputs.build-project == 'true'
-      shell: bash
-      run: |
-        cd ${{ inputs.working-directory }}/pages
-        echo "Building production version..."
-        npm run build
-        echo "Build completed!"
+      - name: Install project dependencies
+        run: |
+          cd pages
+          echo "Installing project dependencies..."
+          npm install
+          echo "Dependencies installed successfully!"
 
-    - name: Verify build output
-      if: inputs.build-project == 'true'
-      shell: bash
-      run: |
-        cd ${{ inputs.working-directory }}/pages
-        if [ -d "dist" ]; then
-          echo "Build output verified: dist directory exists"
-          echo "Files in dist directory:"
-          ls -la dist/
-        else
-          echo "Error: dist directory does not exist after build"
-          exit 1
-        fi
+      - name: Build production version
+        run: |
+          cd pages
+          echo "Building production version..."
+          npm run build
+          echo "Build completed!"
 
-    - name: Prepare for GitHub Pages deployment
-      if: inputs.build-project == 'true'
-      shell: bash
-      run: |
-        cd ${{ inputs.working-directory }}/pages
-        if [ -d "dist" ]; then
+      - name: Verify build output
+        run: |
+          cd pages
+          if [ -d "dist" ]; then
+            echo "Build output verified: dist directory exists"
+            echo "Files in dist directory:"
+            ls -la dist/
+          else
+            echo "Error: dist directory does not exist after build"
+            exit 1
+          fi
+
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./pages/dist
+          force_orphan: true
+          enable_jekyll: false
+
+      - name: Show deployment instructions
+        run: |
+          echo "========================================="
+          echo "PROJECT DEPLOYMENT INFORMATION:"
+          echo "========================================="
           echo "Build artifacts are located in pages/dist directory"
-          echo "These files can be deployed to GitHub Pages"
-          echo "To deploy to GitHub Pages, configure your repository settings:"
-          echo "1. Go to Settings > Pages"
-          echo "2. Select 'Deploy from a branch'"
-          echo "3. Choose 'gh-pages' branch and '/root' folder"
-          echo "4. Run 'gh-pages -d dist' to push build files to gh-pages branch"
-        else
-          echo "Error: dist directory does not exist"
-          exit 1
-        fi
-
-    - name: Show next steps for GitHub Pages
-      if: inputs.build-project == 'true'
-      shell: bash
-      run: |
-        echo "========================================="
-        echo "NEXT STEPS FOR GITHUB PAGES DEPLOYMENT:"
-        echo "========================================="
-        echo "1. Install gh-pages if not already installed:"
-        echo "   npm install --save-dev gh-pages"
-        echo ""
-        echo "2. Add these scripts to your package.json:"
-        echo '   {'
-        echo '     "scripts": {'
-        echo '       "predeploy": "npm run build",'
-        echo '       "deploy": "gh-pages -d dist"'
-        echo '     }'
-        echo '   }'
-        echo ""
-        echo "3. Run deployment command:"
-        echo "   npm run deploy"
-        echo ""
-        echo "4. Configure GitHub Pages in your repository settings:"
-        echo "   Settings -> Pages -> Source: Deploy from a branch -> gh-pages"
-        echo "========================================="
+          echo "These files have been deployed to GitHub Pages"
+          echo ""
+          echo "Your site is now available at:"
+          echo "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+          echo "========================================="
