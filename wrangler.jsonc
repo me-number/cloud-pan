@@ -1,0 +1,20 @@
+{
+  "name": "openlist-back-work",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-08-16",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "ENABLE_D1": true,
+    "REMOTE_D1": ""  // 留空使用本地 D1，或填写远程数据库连接
+  },
+  // 配置 KV 和 D1 绑定
+  "kv_namespaces": [{
+    "binding": "cloud-pan",
+    "id": "9e3dfaeda1ce43b284938b4319fa0629"  // 替换为你的 KV ID
+  }],
+  "d1_databases": [{
+    "binding": "cloud-pan",
+    "database_name": "cloud-pan",
+    "database_id": "536aa98e-3390-4445-b159-fd5f0f0d20c5"  // 替换为你的 D1 ID
+  }]
+}
