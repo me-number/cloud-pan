@@ -601,7 +601,7 @@ lazyload:
   # 加载时替换图
   placeholder: ""
   # 加载失败替换图
-  errorimg: /solitude-demo/img/error_load.avif
+  errorimg: /img/error_load.avif
 # --------------------------- end ---------------------------
 
 # --------------------------- start ---------------------------
