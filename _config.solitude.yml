@@ -731,6 +731,8 @@ extends:
   body:
     - <script src="https://everfu.github.io/solitude-demo/js/schedule.js"></script>
     - <script src="https://npm.akass.cn/chinese-lunar@0.1.4/lib/chinese-lunar.js"></script>
+    - <script defer src="/_vercel/insights/script.js"></script>
+    - <script defer src="/_vercel/speed-insights/script.js"></script>
 # --------------------------- end ---------------------------
 
 # --------------------------- start ---------------------------
