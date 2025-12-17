@@ -43,7 +43,7 @@
     "hexo-theme-solitude": "^3.0.20",
     "hexo-util": "^3.3.0",
     "hexo-wordcount": "^6.0.1",
-    "katex": "^0.16.22",
+    "katex": "^0.16.27",
     "moment": "^2.30.1"
   },
   "packageManager": "pnpm@10.12.4"
