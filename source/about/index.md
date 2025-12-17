@@ -1,9 +1,6 @@
 ---
-title: 关于本人
-date: 2023-11-19 00:00:00
-aside: false
-top_img: false
-background: "#56a178"
-comments: false
-type: "about"
+title: 关于我
+date: 2024-08-27 18:06:21
+type: about
+comment: false
 ---
