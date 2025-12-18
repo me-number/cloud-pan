@@ -733,6 +733,7 @@ extends:
     - <script src="https://npm.akass.cn/chinese-lunar@0.1.4/lib/chinese-lunar.js"></script>
     - <script defer src="/_vercel/insights/script.js"></script>
     - <script defer src="/_vercel/speed-insights/script.js"></script>
+    - <!-- start webpushr code --> <script>(function(w,d, s, id) {if(typeof(w.webpushr)!=='undefined') return;w.webpushr=w.webpushr||function(){(w.webpushr.q=w.webpushr.q||[]).push(arguments)};var js, fjs = d.getElementsByTagName(s)[0];js = d.createElement(s); js.id = id;js.async=1;js.src = "https://cdn.webpushr.com/app.min.js";fjs.parentNode.appendChild(js);}(window,document, 'script', 'webpushr-jssdk'));webpushr('setup',{'key':'BF6vU_HTi4YK7J68RiF3DFnVAC9dRlm_551BhSb9NGOlK24whlAZqfdI-pWW1sTaWn1zcbkDJS71LMHiY1PpzTM' });</script><!-- end webpushr code -->
 # --------------------------- end ---------------------------
 
 # --------------------------- start ---------------------------
