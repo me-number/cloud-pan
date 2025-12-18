@@ -1,0 +1,12 @@
+---
+title:
+date:
+type:
+comment:
+cover:
+ai_text:
+recommend:
+katex:
+reprint:
+locate:
+---
