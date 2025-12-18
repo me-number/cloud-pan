@@ -838,7 +838,7 @@ search:
     #   per_page: 6
   local:
     preload: false
-    CDN: /solitude-demo/search.xml
+    CDN: /search.xml
   docsearch:
     appId: "KNSYWJA80Y"
     apiKey: "64cec8b7ed869453640daca02f5911fc"
