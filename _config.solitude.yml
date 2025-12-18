@@ -496,10 +496,21 @@ footer:
       Bilibili: https://space.bilibili.com/1329819902 || fab fa-bilibili
       Twitter: https://twitter.com/everfu8 || fab fa-twitter
       Douyin: https://v.douyin.com/iJsLc8jt/ || fab fa-tiktok
-
+  # 友情链接
+  #group:
+   # 导航:
+    #  全部文章: /archives/
+    #  全部分类: /categories/
+    #  全部标签: /tags/
+  #  协议:
+     # Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0.html
+   # 友链:
+   #   伍拾柒: https://www.efu.me/
+   #   张洪Heo: https://zhheo.com/
+   #   亦小封: https://meuicat.com/
 
   # 随机友链
-  randomlink: true # 随机友链
+  randomlink: false # 随机友链
 
   # 备案
   beian:
