@@ -1,9 +1,9 @@
 # Site
-title: Solitude
+title: CloudBLOG
 subtitle:
 description: 一款简介优雅的 Hexo 主题
 keywords: 开发
-author: 伍拾柒
+author: 张文涛
 language: zh-CN
 timezone: "Asia/Shanghai"
 
@@ -139,7 +139,7 @@ swpp:
   # 是否启用插件
   enable: true
   # 是否在发布前自动执行脚本
-  # auto_exec: true
+  auto_exec: true
 
 
 plugins:
