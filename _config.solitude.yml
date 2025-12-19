@@ -341,8 +341,8 @@ font:
 # 当用户退出页面时，修改标题
 lure:
   enable: true
-  jump: 404 Not Found
-  back: ヾ(≧∇≦*)ゝHey, hey, you fell for it.
+  jump: CloudBLOG-欢迎再次光临！
+  back: CloudBLOG-感谢您的光临！
 # --------------------------- end ---------------------------
 
 # --------------------------- start ---------------------------
