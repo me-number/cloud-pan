@@ -734,6 +734,7 @@ extends:
     - <script src="https://npm.akass.cn/chinese-lunar@0.1.4/lib/chinese-lunar.js"></script>
     - <script defer src="/_vercel/insights/script.js"></script>
     - <script defer src="/_vercel/speed-insights/script.js"></script>
+    - <script defer src="https://umami.zhang-wentao.cn/script.js" data-website-id="17d8d22d-5c41-42af-86f0-8475924be01d"></script>
 # --------------------------- end ---------------------------
 
 # --------------------------- start ---------------------------
