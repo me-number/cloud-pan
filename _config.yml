@@ -113,9 +113,6 @@ deploy:
   type: git
   branch: main
   repo: git@github.com:me-number/CloudBLOG.git
-  - type: cjh_google_url_submitter
-  - type: cjh_bing_url_submitter
-  - type: cjh_baidu_url_submitter
 
 sitemap:
   path:
