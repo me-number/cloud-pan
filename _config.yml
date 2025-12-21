@@ -180,10 +180,3 @@ swpp:
   enable: false
   # 是否在发布前自动执行脚本
   # auto_exec: true
-
-
-hexo_pro:
-  username: admim
-  password: PassWord
-  avatar: /img/logo.png
-  secret: PassWord

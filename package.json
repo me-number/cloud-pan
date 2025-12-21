@@ -47,7 +47,6 @@
     "hexo-algoliasearch": "^2.0.1", 
     "hexo-swpp": "^4.0.0-alpha.131",
     "swpp-backends": "^3.0.0-alpha.908",
-    "hexo-pro":"^1.2.6",
     "moment": "^2.30.1"
   },
   "packageManager": "pnpm@10.12.4"
