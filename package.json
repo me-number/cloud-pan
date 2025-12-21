@@ -45,8 +45,7 @@
     "katex": "^0.16.22",
     "hexo-generator-search": "^2.4.3",
     "hexo-algoliasearch": "^2.0.1", 
-    "moment": "^2.30.1", 
-    "hexo-submit-urls-to-search-engine": "^2.1.0"
+    "moment": "^2.30.1"
   },
   "packageManager": "pnpm@10.12.4"
 }
