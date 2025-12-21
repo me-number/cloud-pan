@@ -995,7 +995,7 @@ document.addEventListener("copy", () => {
 class ServiceStatus {
     constructor() {
         this.isInitialized = false;
-        this.apiUrl = 'https://api.uptimerobot.com/v2/getMonitors';
+        this.apiUrl = 'https://uptime-status.zhang-wentao.cn/api/status';
         // 在这里直接配置你的 Uptime Kuma 状态页面URL
         this.statusPageUrl = 'https://uptime-status.zhang-wentao.cn';
         this.config = {
