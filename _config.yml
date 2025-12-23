@@ -39,7 +39,7 @@ archive_dir: archives
 category_dir: categories
 code_dir: downloads/code
 i18n_dir: :lang
-skip_render: [README.md,gitbook/**]
+skip_render: [README.md,gitbook/**,api/**]
 
 # Writing
 new_post_name: :title.md # File name of new posts
