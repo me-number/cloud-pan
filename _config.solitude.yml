@@ -30,7 +30,7 @@ nav:
       全部标签: /tags/ || fas fa-tags
     友链:
       友情链接: /links/ || fas fa-link
-    #  宝藏博主: javascript:travelling() || fas fa-gift
+      宝藏博主: javascript:travelling() || fas fa-gift
     我的:
       我的装备: /kit/ || fas fa-cogs
       追番页: /bangumis/ || fas fa-cogs
