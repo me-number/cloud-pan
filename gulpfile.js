@@ -3,10 +3,25 @@ var cleanCSS = require('gulp-clean-css');
 var htmlmin = require('gulp-html-minifier-terser');
 var htmlclean = require('gulp-htmlclean');
 var terser = require('gulp-terser');
+// const javascriptObfuscator = require('gulp-javascript-obfuscator');
+
 // 压缩js
 gulp.task('compress', () =>
 gulp.src(['./public/**/*.js', '!./public/**/*.min.js'])
 .pipe(terser())
+// .pipe(javascriptObfuscator({
+// compact: true,
+// controlFlowFlattening: true,
+// controlFlowFlatteningThreshold: 0.75,
+// deadCodeInjection: true,
+// deadCodeInjectionThreshold: 0.4,
+// debugProtection: true,
+// debugProtectionInterval: 4000,
+// disableConsoleOutput: true,
+// identifierNamesGenerator: 'hexadecimal',
+// log: false,
+// renameGlobals: false,
+// }))
 .pipe(gulp.dest('./public'))
 )
 //压缩css
@@ -41,10 +56,6 @@ minifyURLs: true  //压缩页面URL
 
 // 运行gulp命令时依次执行以下任务
 gulp.task('default', gulp.parallel(
-'compress', 'minify-css', 'minify-html'
+'compress', 'minify-css', 'minify-html',
 ))
 
-作者: Minecraft-Sep
-链接: https://mc-sep.pages.dev/post/5ytg
-来源: Minecraft-Sep
-著作权归作者所有。 商业转载请联系作者获得授权，非商业转载请注明出处。
