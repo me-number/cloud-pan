@@ -41,7 +41,7 @@ nav:
   # Right button
   # 右侧按钮
   right:
-    random: true # Random article / 随机文章按钮
+    random: false # Random article / 随机文章按钮
     custom:
       
 # --------------------------- end ---------------------------
@@ -126,7 +126,6 @@ aside:
     # 社交信息图标
     information:
       Github: https://github.com/me-number || fab fa-github # Name: link || icon
-      Bsky: https://bsky.app/profile/efu.me || fab fa-bluesky
   # --------------------------- end ---------------------------
 
   # --------------------------- start ---------------------------
