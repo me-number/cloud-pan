@@ -721,7 +721,7 @@ extends:
   # Insert in head
   # 插入到 head
   head:
-    - <link rel="stylesheet" href="/css/welcome.css">
+    
 
   # Insert in body
   # 插入到 body
@@ -972,7 +972,3 @@ CDN:
     # waline_css
     # waline_js
 # --------------------------- end ---------------------------
-
-card_announcement:
-  enable: true
-  content: <div id="welcome-info"></div>
