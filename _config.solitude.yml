@@ -972,3 +972,7 @@ CDN:
     # waline_css
     # waline_js
 # --------------------------- end ---------------------------
+
+card_announcement:
+  enable: true
+  content: <div id="welcome-info"></div>
