@@ -30,6 +30,30 @@ const sidebarFn = () => {
   });
 };
 
+(function() {
+  // 1. 阻止双指缩放 (Pinch Zoom)
+  document.addEventListener('touchstart', function(event) {
+    if (event.touches.length > 1) {
+      event.preventDefault(); // 当检测到多于一根手指时，禁止默认缩放
+    }
+  }, { passive: false });
+
+  // 2. 阻止 iOS 特有的手势缩放 (Gesture Zoom)
+  document.addEventListener('gesturestart', function(event) {
+    event.preventDefault(); // 直接禁止手势缩放开始
+  });
+
+  // 3. 辅助：禁止双击缩放
+  var lastTouchEnd = 0;
+  document.addEventListener('touchend', function(event) {
+    var now = (new Date()).getTime();
+    if (now - lastTouchEnd <= 300) {
+      event.preventDefault(); // 两次点击间隔小于300ms则视为双击，予以禁止
+    }
+    lastTouchEnd = now;
+  }, false);
+})();
+
 const scrollFn = () => {
   const $rightside = document.getElementById("rightside");
   const $header = document.getElementById("page-header");
