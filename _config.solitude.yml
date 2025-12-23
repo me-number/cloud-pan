@@ -33,6 +33,7 @@ nav:
     #  宝藏博主: javascript:travelling() || fas fa-gift
     我的:
       我的装备: /kit/ || fas fa-cogs
+      追番页: /bangumis/ || fas fa-bilibili
       关于本站: /about/ || fas fa-user
       音乐馆: /music/ || fas fa-music
       站点状态: https://uptime-status.zhang-wentao.cn/ || fas fa-cogs
