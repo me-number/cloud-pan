@@ -46,23 +46,3 @@
       <div id="calendar-main">
       </div>
     </div>
-
-- name: uptime
-  title: 服务状态
-  icon: fas fa-server
-  no_head: true
-  content_html: |
-    <div class="uptime-dashboard">
-      <div class="uptime-header">
-        <div class="uptime-title">
-          <i class="fas fa-chart-line"></i>
-          <span>实时监控</span>
-        </div>
-        <div class="uptime-summary" id="uptimeSummary">
-          <span class="summary-text">加载中...</span>
-        </div>
-      </div>
-      <div class="uptime-services" id="uptimeServices">
-        <!-- 动态内容将由JavaScript填充 -->
-      </div>
-    </div> 
