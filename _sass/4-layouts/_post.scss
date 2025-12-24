@@ -19,13 +19,18 @@
 .post-image,
 .page-image {
   position: relative;
-  transform: translate(0);
-  /* 1. 将 90% 改为 56.25% (16:9 比例) */
+  /* 修改点 1：移除 transform: translate(0)，因为它会限制 Lightense 的弹出层级 */
+  transform: none; 
+  
+  /* 修改点 2：保持 16:9 比例 */
   padding-top: 56.25%; 
-  /* 2. 建议移除 min-height 或设为 0，防止在窄屏下容器被强制拉高 */
   min-height: 0; 
   border-radius: 8px;
-  overflow: hidden;
+
+  /* 修改点 3：重要！移除 overflow: hidden，否则放大后的图片会被容器切断 */
+  /* 如果你需要圆角，图片本身也需要加圆角，或者使用下方的优化方案 */
+  overflow: visible; 
+  
   background: var(--background-alt-color);
 
   img {
@@ -35,13 +40,16 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    /* 修改点 4：确保用户可以点击，且不会被 Lightense 误判 */
     user-select: auto;
-    /* 3. 确保没有边框干扰 */
     border: none; 
+    border-radius: 8px; /* 将圆角直接加在图片上，弥补容器取消 overflow:hidden 的影响 */
+    
+    /* 增加一个过渡，点击时更平滑 */
+    transition: opacity 0.3s ease;
   }
 
   @media only screen and (max-width: $desktop) {
-    /* 4. 桌面端缩放时也保持 56.25% */
     padding-top: 56.25%; 
     margin-bottom: 40px;
   }
@@ -51,12 +59,10 @@
   }
 }
 
-/* 如果 .page-image 已经设置了 56.25%，可以保留，
-   关键是上面的 .post-image 需要同步 */
 .page-image {
   padding-top: 56.25%;
   margin-bottom: 48px;
-  min-height: 0; /* 同样建议移除 min-height */
+  min-height: 0;
 }
 
 .post-video,
