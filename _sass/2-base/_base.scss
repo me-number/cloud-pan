@@ -1,8 +1,16 @@
+/* 1. 必须放在第一行：引入变量模块 */
+@use "../0-settings/variables" as *;
+
+/* 2. 保底机制：如果某些变量在 variables.scss 中缺失，防止构建崩溃 */
+$mobile: 576px !default;
+$global-transition: all 0.3s ease !default;
+
 *, *::after, *::before {
   box-sizing: border-box;
 }
 
 body {
+  /* 这里的变量现在可以从 @use 引入的文件中读取 */
   font-family: $base-font-family;
   font-size: $base-font-size;
   line-height: $base-line-height;
@@ -22,12 +30,7 @@ body {
   background-color: var(--brand-color);
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, h2, h3, h4, h5, h6 {
   font-family: $heading-font-family;
   font-weight: $heading-font-weight;
   line-height: $heading-line-height;
@@ -35,29 +38,12 @@ h6 {
   color: var(--heading-font-color);
 }
 
-h1 {
-  font-size: $font-size-h1;
-}
-
-h2 {
-  font-size: $font-size-h2;
-}
-
-h3 {
-  font-size: $font-size-h3;
-}
-
-h4 {
-  font-size: $font-size-h4;
-}
-
-h5 {
-  font-size: $font-size-h5;
-}
-
-h6 {
-  font-size: $font-size-h6;
-}
+h1 { font-size: $font-size-h1; }
+h2 { font-size: $font-size-h2; }
+h3 { font-size: $font-size-h3; }
+h4 { font-size: $font-size-h4; }
+h5 { font-size: $font-size-h5; }
+h6 { font-size: $font-size-h6; }
 
 blockquote {
   position: relative;
@@ -69,9 +55,7 @@ blockquote {
   border-left: 4px solid var(--brand-color);
   color: var(--heading-font-color);
 
-  p {
-    margin-bottom: 10px;
-  }
+  p { margin-bottom: 10px; }
 
   cite {
     display: inline-block;
@@ -80,7 +64,6 @@ blockquote {
     font-weight: 700;
     font-style: normal;
     color: var(--heading-font-color);
-
   }
 
   @media only screen and (max-width: $mobile) {
@@ -99,16 +82,13 @@ pre {
   color: var(--heading-font-color);
 }
 
-img,
-.lightense-wrap {
+img, .lightense-wrap {
   max-width: 100%;
   height: auto;
   vertical-align: middle;
 }
 
-img,
-.lightense-wrap,
-.gallery {
+img, .lightense-wrap, .gallery {
   &+em {
     display: block;
     margin-top: 20px;
@@ -162,7 +142,6 @@ hr {
 
 table {
   font-size: 12px;
-  color: var(--dark);
   width: 100%;
   border-width: 1px;
   border-color: var(--background-alt-color);
