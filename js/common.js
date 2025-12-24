@@ -104,12 +104,12 @@ document.addEventListener("DOMContentLoaded", function() {
     elements_selector: ".lazy"
   })
 
-
-  /* =======================
-  // Zoom Image
+/* =======================
+  // Zoom Image (支持 post-head)
   ======================= */
-  const lightense = document.querySelector(".page__content img, .post__content img, .gallery__image img"),
-  imageLink = document.querySelectorAll(".page__content a img, .post__content a img, .gallery__image a img");
+  // 1. 在选择器中加入 .post-head img
+  const lightense = document.querySelector(".post-head img, .page__content img, .post__content img, .gallery__image img"),
+  imageLink = document.querySelectorAll(".post-head a img, .page__content a img, .post__content a img, .gallery__image a img");
 
   if (imageLink) {
     for (var i = 0; i < imageLink.length; i++) imageLink[i].parentNode.classList.add("image-link");
@@ -117,7 +117,8 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   if (lightense) {
-    Lightense(".page__content img:not(.no-lightense), .post__content img:not(.no-lightense), .gallery__image img:not(.no-lightense)", {
+    // 2. 在初始化函数中也同步加入 .post-head img:not(.no-lightense)
+    Lightense(".post-head img:not(.no-lightense), .page__content img:not(.no-lightense), .post__content img:not(.no-lightense), .gallery__image img:not(.no-lightense)", {
     padding: 60,
     offset: 30
     });
