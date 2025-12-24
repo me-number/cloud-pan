@@ -96,48 +96,36 @@ document.addEventListener("DOMContentLoaded", function() {
   ======================= */
   reframe(".post__content iframe:not(.reframe-off), .page__content iframe:not(.reframe-off)");
 
-
-  /* =======================
-  // LazyLoad Images
+/* =======================
+  // 修正全屏空白后的 JS
   ======================= */
-  var lazyLoadInstance = new LazyLoad({
-    elements_selector: ".lazy"
-  })
- document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function() {
   const baseSelector = ".post-image img, .page__content img, .post__content img, .gallery__image img";
-  const linkSelector = ".post-image a img, .page__content a img, .post__content a img, .gallery__image a img";
 
   function applyLightense() {
-    // 排除链接图片
-    document.querySelectorAll(linkSelector).forEach(img => {
-      img.classList.add("no-lightense");
-    });
-
-    // 初始化 Lightense
-    if (document.querySelector(baseSelector)) {
+    // 检查 Lightense 是否存在
+    if (typeof Lightense === "function") {
       Lightense(`${baseSelector}:not(.no-lightense)`, {
-        padding: 60,
-        offset: 30
+        padding: 40,   // 稍微减少边距
+        offset: 10,    // 显著减少偏移，防止计算错误
+        duration: 300, // 缩短动画时间，防止动画卡死在空白状态
+        cubicBezier: 'cubic-bezier(.2, 0, .1, 1)'
       });
     }
   }
 
-  // 1. 初次尝试
-  applyLightense();
-
-  // 2. 针对懒加载图片的特殊监听
-  const headImage = document.querySelector('.post-image img');
-  if (headImage) {
-    headImage.addEventListener('load', function() {
-      // 当图片真正加载完成（src替换成功）后，再次触发
+  // 监听图片加载，防止图片还没显示就初始化导致空白
+  const allImgs = document.querySelectorAll(baseSelector);
+  allImgs.forEach(img => {
+    if (img.complete) {
       applyLightense();
-    });
-  }
+    } else {
+      img.addEventListener('load', applyLightense);
+    }
+  });
 
-  // 3. 兜底：window 加载完成
   window.addEventListener("load", applyLightense);
 });
-
 
 
   /* =================================
