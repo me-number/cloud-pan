@@ -1,3 +1,10 @@
+// 1. 在文件最顶部引入 mixins 文件，并使用 as * 展开
+@use "mixins" as *; 
+
+// 或者如果路径较深，请根据实际情况调整：
+// @use "0-settings/mixins" as *;
+
+// 2. 这里的代码就可以正常识别 Mixin 了
 // Lists Reset
 .list-reset {
   @include list-reset();
