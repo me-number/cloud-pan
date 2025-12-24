@@ -110,9 +110,6 @@ li {
 
 ## Images
 
-![Beach]({{site.baseurl}}/images/12-1.jpg#wide)
-*Photo by [Luke McKeown](https://unsplash.com/photos/nlyWZtWTzCo) on [Unsplash](https://unsplash.com/)*
-
 <div class="gallery-box">
   <div class="gallery">
     <img src="/images/100.jpg">
