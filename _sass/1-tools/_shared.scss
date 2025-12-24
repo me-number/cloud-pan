@@ -2,7 +2,7 @@
  * 引入变量定义
  * 注意：根据你的目录结构，路径通常指向 0-settings/_variables.scss
  */
-@use "../0-settings/variables" as *;
+@import "../0-settings/variables" as *;
 
 /**
  * Shared declarations for certain elements.
