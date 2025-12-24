@@ -3,29 +3,48 @@ layout: null
 ---
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="{{ '/feed.xslt' | relative_url }}"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-    <channel>
-        <title>{{ site.title | xml_escape }}</title>
-        <description>{{ site.description | xml_escape }}</description>
-        <link>{{ site.url }}{{ site.baseurl }}/</link>
-        <atom:link href="{{ "/feed.xml" | absolute_url }}" rel="self" type="application/rss+xml"/>
-        <pubDate>{{ site.time | date_to_rfc822 }}</pubDate>
-        <lastBuildDate>{{ site.time | date_to_rfc822 }}</lastBuildDate>
-        <generator>Jekyll v{{ jekyll.version }}</generator>
-        {% for post in site.posts limit:10 %}
-            <item>
-                <title>{{ post.title | xml_escape }}</title>
-                <description>{{ post.content | xml_escape }}</description>
-                <pubDate>{{ post.date | date_to_rfc822 }}</pubDate>
-                <link>{{ post.url | absolute_url }}</link>
-                <guid isPermaLink="true">{{ post.url | absolute_url }}</guid>
-                {% for tag in post.tags %}
-                <category>{{ tag | xml_escape }}</category>
-                {% endfor %}
-                {% for cat in post.categories %}
-                <category>{{ cat | xml_escape }}</category>
-                {% endfor %}
-            </item>
-        {% endfor %}
-    </channel>
+<rss version="2.0" 
+  xmlns:content="purl.org"
+  xmlns:wfw="wellformedweb.org"
+  xmlns:dc="purl.org"
+  xmlns:atom="http://www.w3.org/2005/Atom"
+  xmlns:sy="purl.org"
+  xmlns:slash="purl.org"
+  xmlns:media="search.yahoo.com">
+
+  <channel>
+    <title>{{ site.title | xml_escape }}</title>
+    <atom:link href="{{ '/feed.xml' | absolute_url }}" rel="self" type="application/rss+xml" />
+    <link>{{ site.url }}{{ site.baseurl }}/</link>
+    <description>{{ site.description | xml_escape }}</description>
+    <lastBuildDate>{{ site.time | date_to_rfc822 }}</lastBuildDate>
+    <language>zh-CN</language>
+    <generator>Jekyll v{{ jekyll.version }}</generator>
+
+    {% for post in site.posts limit:20 %}
+    <item>
+      <title>{{ post.title | xml_escape }}</title>
+      <link>{{ post.url | absolute_url }}</link>
+      <pubDate>{{ post.date | date_to_rfc822 }}</pubDate>
+      <guid isPermaLink="true">{{ post.url | absolute_url }}</guid>
+      <dc:creator><![CDATA[{{ site.author.name | default: site.title }}]]></dc:creator>
+      
+      {# 摘要：用于列表显示 #}
+      <description>{{ post.excerpt | strip_html | truncate: 160 | xml_escape }}</description>
+      
+      {# 全文：用于阅读器阅读 #}
+      <content:encoded><![CDATA[{{ post.content }}]]></content:encoded>
+
+      {# 分类与标签 #}
+      {% for tag in post.tags %}
+      <category><![CDATA[{{ tag }}]]></category>
+      {% endfor %}
+      
+      {# 图片支持（如果你的文章 front matter 有 image 字段） #}
+      {% if post.image %}
+      <media:content url="{{ post.image | absolute_url }}" medium="image" />
+      {% endif %}
+    </item>
+    {% endfor %}
+  </channel>
 </rss>

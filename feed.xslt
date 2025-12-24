@@ -1,355 +1,59 @@
+---
+layout: none
+---
 <?xml version="1.0" encoding="utf-8"?>
-<xsl:stylesheet version="3.0"
-  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-  xmlns:atom="http://www.w3.org/2005/Atom">
-  <xsl:output method="html" version="1.0" encoding="UTF-8" indent="yes"/>
-
+<!-- 1. 修正命名空间 URL -->
+<xsl:stylesheet version="1.0" 
+    xmlns:xsl="www.w3.org"
+    xmlns:atom="www.w3.org">
+  <xsl:output method="html" encoding="utf-8" indent="yes" />
+  
   <xsl:template match="/">
-    <xsl:variable name="title">
-      <xsl:value-of select="/atom:feed/atom:title"/>
-    </xsl:variable>
-    <xsl:variable name="description">
-      <xsl:value-of select="/atom:feed/atom:subtitle"/>
-    </xsl:variable>
-    <xsl:variable name="link">
-      <xsl:value-of select="/atom:feed/atom:link[@rel='alternate']/@href | /atom:feed/atom:link[not(@rel)]/@href"/>
-    </xsl:variable>
+    <html lang="zh-CN">
+    <head>
+      <meta charset="utf-8" />
+      <title>RSS Feed - {{ site.title }}</title>
+      <style>
+        body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; max-width: 800px; margin: 40px auto; padding: 0 20px; color: #333; background: #f9f9f9; }
+        .container { background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        h1 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .item { border-bottom: 1px solid #eee; padding: 20px 0; }
+        .item:last-child { border: none; }
+        h2 { margin: 0 0 10px 0; font-size: 1.4em; }
+        a { color: #3498db; text-decoration: none; font-weight: bold; }
+        a:hover { text-decoration: underline; }
+        .meta { font-size: 0.85em; color: #888; margin-bottom: 10px; }
+        .summary { color: #555; font-size: 0.95em; }
+        .notice { background: #eef7fd; border-left: 4px solid #3498db; padding: 15px; margin-bottom: 30px; font-size: 0.9em; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h1>{{ site.title }}</h1>
+        <div class="notice">
+          这是本站的 <strong>RSS 订阅源</strong>。请将浏览器地址栏中的 URL 复制到你的阅读器（如 Feedly, Reeder, NetNewsWire）中即可完成订阅。
+        </div>
 
-    <html>
-      <head>
-        <meta charset="utf-8"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1"/>
-        <title>
-          <xsl:value-of select="$title"/>
- - 订阅源</title>
-        <style>
-          :root {
-            --bg-color: #f8fafc;
-            --text-color: #1e293b;
-            --card-bg:rgba(255, 255, 255, 0.8);
-            --border-color: #e2e8f0;
-            --accent-color: #4f46e5;
-            --muted-color: #64748b;
-            --overlay: rgba(255, 255, 255, 0.5);
-            --header-text-light: #1f2937;
-            --header-muted-light: #6b7280;
-            --subscribe-bg-light: #f3f4f6;
-
-            --header-text-dark: #f3f4f6;
-            --header-muted-dark: #9ca3af;
-            --subscribe-bg-dark: #1f2937;
-            
-            --header-text: var(--header-text-light);
-            --header-muted: var(--header-muted-light);
-            --subscribe-bg: var(--subscribe-bg-light);
-          }
-          
-          @media (prefers-color-scheme: dark) {
-            :root {
-              --bg-color: #0f172a;
-              --text-color: #f8fafc;
-              --card-bg:rgba(30, 41, 59, 0.8);
-              --border-color: #334155;
-              --accent-color: #818cf8;
-              --muted-color: #94a3b8;
-              --overlay: rgba(15, 23, 42, 0.5);
-              --header-text: var(--header-text-dark);
-              --header-muted: var(--header-muted-dark);
-              --subscribe-bg: var(--subscribe-bg-dark);
-            }
-          }
-          
-          * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-          }
-          
-          body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.5;
-            color: var(--text-color);
-            background-color: var(--bg-color);
-            min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
-            background-image: url('https://bing.liushen.fun/daily.webp');
-            background-size: cover;
-            background-attachment: fixed;
-            background-position: center;
-          }
-          
-          body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--overlay);
-            backdrop-filter: blur(5px);
-            z-index: -1;
-          }
-          
-          a {
-            color: var(--accent-color);
-            text-decoration: none;
-          }
-          
-          a:hover {
-            text-decoration: underline;
-          }
-          
-          .container {
-            width: 100%;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem 1rem;
-          }
-          
-          .header {
-            padding: 2rem 0;
-            color: var(--header-text);
-            text-align: left;
-            max-width: 800px;
-            margin: 0 auto;
-          }
-
-          .header-top {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px dashed var(--header-text);
-          }
-
-          .header-avatar svg {
-            flex-shrink: 0;
-            color: var(--header-text);
-          }
-
-          .header-title {
-            font-size: 1.75rem;
-            font-weight: 700;
-          }
-
-          .header-description-cn,
-          .header-description-en {
-            margin-bottom: 1rem;
-            font-size: 1rem;
-            color: var(--header-text);
-            line-height: 1.6;
-          }
-
-          .header-subscribe {
-            margin-top: 2rem;
-            padding: 1rem;
-            background: var(--subscribe-bg);
-            border-radius: 0.5rem;
-            border-left: 4px solid var(--header-text);
-            font-size: 0.95rem;
-            color: var(--header-muted);
-          }
-
-          .header-subscribe a {
-            color: var(--header-text);
-            font-weight: bold;
-            text-decoration: underline;
-            transition: color 0.3s ease;
-          }
-
-          .header-subscribe a:hover {
-            color:rgb(9, 147, 197);
-          }
-          
-          .article-list {
-            display: grid;
-            gap: 1.5rem;
-          }
-          
-          .article-card {
-            background-color: var(--card-bg);
-            backdrop-filter: blur(5px);
-            border-radius: 0.8rem;
-            padding: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--border-color);
-            transition: transform 0.2s, box-shadow 0.2s;
-          }
-          
-          .article-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-          }
-          
-          .article-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-          }
-          
-          .article-meta {
-            display: flex;
-            gap: 1rem;
-            color: var(--muted-color);
-            font-size: 0.875rem;
-            margin-bottom: 1rem;
-          }
-          
-          .article-summary {
-            margin-bottom: 1rem;
-            color: var(--text-color);
-          }
-          
-          .article-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 1rem;
-          }
-          
-          .tag {
-            background-color: var(--border-color);
-            color: var(--text-color);
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            font-size: 0.75rem;
-          }
-          
-          .footer {
-            margin-top: 3rem;
-            padding: 2rem 1rem;
-            text-align: center;
-            color: var(--muted-color);
-            font-size: 1.0rem;
-            transition: color 0.2s ease-in-out;
-          }
-
-          .footer-line {
-            margin: 0.5rem 0;
-          }
-
-          .footer-line a, .footer-line span {
-            color: var(--muted-color, #6b7280);
-            text-decoration: none;
-            margin: 0 0.5rem;
-            transition: color 0.3s ease;
-          }
-
-          .footer-line a:hover {
-            color:rgb(50, 124, 189);
-          }
-
-          .footer-line span {
-            user-select: none;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <header class="header">
-            <div class="header-top">
-              <div class="header-avatar">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="40" height="40">
-                  <circle cx="6" cy="18" r="2"></circle>
-                  <path d="M4 4a16 16 0 0 1 16 16"></path>
-                  <path d="M4 11a9 9 0 0 1 9 9"></path>
-                </svg>
-              </div>
-              <h1 class="header-title">
-                <xsl:value-of select="$title" disable-output-escaping="yes"/>
-              </h1>
-            </div>
-
-            <p class="header-description-cn">
-    技术博客，提供建站教程、编程实战笔记、生活点滴，个人经验，融合技术开发与人文思考，定期更新深度指南与创意灵感，给大家提供更多帮助。
-            </p>
-            <p class="header-description-en">
-    LiuShen’s Tech Blog, Sharing tutorials, coding notes, life moments, personal experiences, blending tech and humanities, with regularly updated guides and creative inspiration.
-            </p>
-
-            <div class="header-subscribe">
-              <p>
-      不要诧异于异常精美的页面，你可以直接使用 RSS 阅读器比如：
-                <a href="https://feedly.com/i/subscription/feed/{$link}" target="_blank" rel="noopener noreferrer">Feedly</a>,
-                <a href="https://www.inoreader.com/feed/{$link}" target="_blank" rel="noopener noreferrer">Inoreader</a>,
-                <a href="https://www.newsblur.com/?url={$link}" target="_blank" rel="noopener noreferrer">Newsblur</a>,
-                <a href="follow://add?url={$link}" rel="noopener noreferrer">Follow</a> 或者
-                <a href="feed:{$link}" rel="noopener noreferrer">RSS Reader</a> 等工具，来订阅这个 RSS 源链接。
-              </p>
-            </div>
-          </header>
-
-      <div class="article-list">
-        <!-- 注意：Jekyll-feed 的根节点通常是 /atom:feed -->
-        <xsl:for-each select="/atom:feed/atom:entry">
-          <article class="article-card">
-            <h2 class="article-title">
-              <!-- 修复：Jekyll 的链接通常在 href 属性中 -->
-              <a href="{atom:link[@rel='alternate']/@href}" target="_blank">
-                <xsl:value-of select="atom:title" disable-output-escaping="yes"/>
+        <!-- 2. 修改匹配路径：适配 RSS 2.0 的结构 /rss/channel/item -->
+        <xsl:for-each select="/rss/channel/item">
+          <div class="item">
+            <h2>
+              <a href="{link}" target="_blank">
+                <xsl:value-of select="title" />
               </a>
             </h2>
-            <div class="article-meta">
-              <time>
-                <!-- 适配：Jekyll 默认使用 atom:published 或 atom:updated -->
-                <xsl:choose>
-                  <xsl:when test="atom:published">
-                    <xsl:value-of select="substring(atom:published, 1, 10)"/>
-                  </xsl:when>
-                  <xsl:otherwise>
-                    <xsl:value-of select="substring(atom:updated, 1, 10)"/>
-                  </xsl:otherwise>
-                </xsl:choose>
-              </time>
-              <span> · </span>
-              <span>
-                <!-- 获取第一个分类 -->
-                <xsl:value-of select="atom:category[1]/@term"/>
-              </span>
+            <div class="meta">
+              <!-- 截取 RSS 格式日期 (Mon, 25 Dec 2025 ...) 的日期部分 -->
+              发布于：<xsl:value-of select="substring(pubDate, 5, 12)" />
             </div>
-            <p class="article-summary">
-              <xsl:value-of select="atom:summary" disable-output-escaping="yes"/>
-            </p>
-            
-            <xsl:if test="atom:category">
-              <div class="article-tags">
-                <xsl:for-each select="atom:category">
-                  <span class="tag">
-                    <xsl:value-of select="@term"/>
-                  </span>
-                </xsl:for-each>
-              </div>
-            </xsl:if>
-          </article>
+            <div class="summary">
+              <!-- 3. 开启转义，允许显示摘要中的 HTML 格式 -->
+              <xsl:value-of select="description" disable-output-escaping="yes" />
+            </div>
+          </div>
         </xsl:for-each>
-        
-          <footer class="footer">
-            <div class="footer-line">
-              <a href="https://www.dogecloud.com/" target="_blank" rel="nofollow noopener noreferrer">多吉云</a>
-              <span>|</span>
-              <a href="https://www.aliyun.com/" target="_blank" rel="nofollow noopener noreferrer">阿里云</a>
-              <span>|</span>
-              <a href="https://cloud.tencent.com/" target="_blank" rel="nofollow noopener noreferrer">腾讯云</a>
-              <span>|</span>
-              <a href="https://atom.io/" target="_blank" rel="nofollow noopener noreferrer">Atom</a>
-            </div>
-            <div class="footer-line">
-              <a href="https://github.com/willow-god/hexo-pretty-feed" target="_blank" rel="nofollow noopener noreferrer">项目地址</a>
-              <span>|</span>
-              <span>MIT License © 2025</span>
-              <span>|</span>
-              <a href="https://www.liushen.fun/" target="_blank" rel="nofollow noopener noreferrer">LiuShen</a>
-            </div>
-            <div class="footer-line">
-              <a href="https://zhang-wentao.cn/" target="_blank" rel="nofollow noopener noreferrer">张文涛</a>
-              <span>|</span>
-              <a href="https://bing.liushen.fun/" target="_blank" rel="nofollow noopener noreferrer">Bing每日一图</a>
-            </div>
-          </footer>
-
-        </div>
-      </body>
+      </div>
+    </body>
     </html>
   </xsl:template>
 </xsl:stylesheet>
