@@ -34,11 +34,11 @@
 
   <!-- SCSS 注入编译 -->
   <style>
-    {%- capture scss_source -%}
-      @import "0-settings/variables";
-      @import "0-settings/mixins";
-      {% include main.scss %}
-    {%- endcapture -%}
-    {{ scss_source | scssify }}
+  {%- capture scss_source -%}
+  @import "0-settings/variables";
+  @import "0-settings/mixins";
+  {% include main.scss %}
+  {%- endcapture -%}
+  {{ scss_source | scssify }}
   </style>
 </head>
