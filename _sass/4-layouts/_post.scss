@@ -198,52 +198,6 @@
   }
 }
 
-.post__share {
-
-  .share__list {
-    display: flex;
-    align-items: center;
-    width: 100%;
-  }
-
-  .share__item {
-    width: 25%;
-    margin-right: 8px;
-    margin-bottom: 0;
-    text-align: center;
-
-    &:last-child {
-      margin-right: 0;
-    }
-  }
-
-  .share__link {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 54px;
-    font-size: 18px;
-    text-transform: uppercase;
-    border: none;
-    border-radius: 8px;
-    background: var(--background-alt-color);
-
-    i {
-      transition: transform .25s;
-      will-change: transform;
-    }
-
-    &:hover {
-      color: var(--heading-font-color);
-
-      i {
-        transform: scale(1.1);
-      }
-    }
-  }
-}
-
 /* Related posts */
 .related-posts {
   display: none;
