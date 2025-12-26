@@ -23,19 +23,6 @@
   <link rel="preload" as="image" href="{{ page.image | relative_url }}" fetchpriority="high">
   {% endif %}
 
-  <!-- 3. 内嵌关键 CSS 解决“屏蔽渲染”并优化禁止缩放 -->
-  <style>
-    :root { --background-color: #ffffff; }
-    [dark] { --background-color: #121212; }
-    html, body { 
-      background-color: var(--background-color); 
-      margin: 0; padding: 0; 
-      touch-action: pan-x pan-y; /* 锁定 CSS 层面缩放 */
-      -webkit-text-size-adjust: 100%; 
-    }
-    .post-image, .page-image, .article__image { background: #eee; min-height: 200px; }
-  </style>
-
   <!-- 4. 异步加载主 CSS (带时间戳) -->
   <link rel="stylesheet" href="{{ '/css/main.css' | relative_url }}?v={{ site.time | date: '%Y%m%d%H%M' }}" media="print" onload="this.media='all'">
   
