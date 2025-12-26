@@ -1,3 +1,25 @@
+// 禁止键盘快捷键缩放 (Ctrl + +/-/0)
+document.addEventListener('keydown', function (event) {
+  if ((event.ctrlKey || event.metaKey) && 
+      (event.key === '+' || event.key === '-' || event.key === '=' || event.key === '0')) {
+    event.preventDefault();
+  }
+}, { passive: false });
+
+// 禁止鼠标滚轮缩放 (Ctrl + MouseWheel)
+document.addEventListener('wheel', function (event) {
+  if (event.ctrlKey || event.metaKey) {
+    event.preventDefault();
+  }
+}, { passive: false });
+
+// 额外保护：禁止移动端双指手势（针对某些强行缩放的浏览器）
+document.addEventListener('touchstart', function (event) {
+  if (event.touches.length > 1) {
+    event.preventDefault();
+  }
+}, { passive: false });
+
 document.addEventListener("DOMContentLoaded", function() {
   'use strict';
 
