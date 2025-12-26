@@ -7,7 +7,9 @@
   <title>{% if page.title %}{{ page.title }}{% else %}{{ site.data.settings.title }}{% endif %}</title>
   <meta name='description' content='{% if page.description %}{{ page.description | strip_html | strip_newlines | truncate: 160 }}{% else %}{{ site.data.settings.description }}{% endif %}'>
 
-  <link rel="canonical" href="{{ page.url | replace:'index.html','' | absolute_url }}">
+  <!-- 修复：确保输出包含 https:// 的绝对网址，解决 Google "不是绝对网址" 错误 -->
+  <link rel="canonical" href="{{ page.url | absolute_url | replace:'index.html','' }}">
+  
   <link rel="alternate" type="application/rss+xml" title="{{ site.data.settings.title | escape }}" href="{{ "/feed.xml" | relative_url }}">
 
   <!-- 1. 性能优化：预加载 LCP 关键图片 -->
@@ -19,7 +21,7 @@
   <link rel="preload" as="image" href="{{ page.image | relative_url }}" fetchpriority="high">
   {% endif %}
 
-  <!-- 2. 性能优化：预加载本地字体（路径必须与 SCSS 里的 url 一致） -->
+  <!-- 2. 性能优化：预加载本地字体 -->
   <link rel="preload" href="{{ '/fonts/fa-solid-900.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="{{ '/fonts/fa-regular-400.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="{{ '/fonts/fa-brands-400.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin>
@@ -31,13 +33,13 @@
     <link rel="stylesheet" href="{{ '/css/main.css' | relative_url }}?v={{ site.time | date: '%Y%m%d%H%M' }}">
   </noscript>
 
-  <!-- 5. 主题色切换与背景锁定脚本（内联执行，防止白屏闪烁） -->
+  <!-- 5. 主题色切换与背景锁定脚本（防止白屏闪烁） -->
   <script>
     (function() {
       var theme = localStorage.getItem("theme");
       var config = "{{ site.data.settings.color_scheme }}";
       
-      // 2025 优化：在 CSS 加载前通过 JS 锁定背景色，缓解“屏蔽渲染”导致的白屏
+      // 2025 优化：锁定背景色缓解白屏
       var isDark = theme === "dark" || (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches);
       var initialBg = isDark ? "#121212" : "#ffffff";
       document.documentElement.style.backgroundColor = initialBg;
@@ -57,18 +59,15 @@
   <!-- 6. 全平台禁止缩放脚本 -->
   <script defer>
     (function() {
-      // 键盘快捷键与滚轮拦截 (Windows/macOS)
       document.addEventListener('keydown', function (e) {
         if ((e.ctrlKey || e.metaKey) && ['+', '-', '=', '0'].includes(e.key)) e.preventDefault();
       }, { passive: false });
       document.addEventListener('wheel', function (e) {
         if (e.ctrlKey || e.metaKey) e.preventDefault();
       }, { passive: false });
-      // 移动端多指缩放拦截
       document.addEventListener('touchstart', function (e) {
         if (e.touches.length > 1) e.preventDefault();
       }, { passive: false });
-      // iOS 专用：禁止双击放大
       let lastTouch = 0;
       document.addEventListener('touchend', function (e) {
         const now = Date.now();

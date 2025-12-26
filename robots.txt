@@ -4,4 +4,5 @@ layout: null
 User-agent: *
 Allow: /
 
+# 使用 absolute_url 自动生成带 https:// 的完整路径
 Sitemap: {{ "/sitemap.xml" | absolute_url }}
