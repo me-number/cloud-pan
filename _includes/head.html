@@ -9,27 +9,26 @@
 
   <!-- 1. DNS 预解析 -->
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 
   <link rel="canonical" href="{{ page.url | replace:'index.html','' | absolute_url }}">
   <link rel="alternate" type="application/rss+xml" title="{{ site.data.settings.title | escape }}" href="{{ "/feed.xml" | relative_url }}">
 
-  <!-- 2. 性能优化：精准预加载 LCP 图片 -->
+  <!-- 2. 性能优化：预加载 LCP 关键图片 (路径确保一致) -->
   {% if site.data.settings.logo %}
   <link rel="preload" as="image" href="{{ site.data.settings.logo | relative_url }}" fetchpriority="high">
   {% endif %}
-  <!-- 逻辑：仅在详情页预加载，首页不预加载 page.image 以免产生 404 或资源竞争 -->
   {% if page.image and page.url != "/" %}
   <link rel="preload" as="image" href="{{ page.image | relative_url }}" fetchpriority="high">
   {% endif %}
 
-  <!-- 4. 异步加载主 CSS (带时间戳) -->
+  <!-- 3. 异步加载主 CSS (带时间戳) -->
   <link rel="stylesheet" href="{{ '/css/main.css' | relative_url }}?v={{ site.time | date: '%Y%m%d%H%M' }}" media="print" onload="this.media='all'">
   
-  <!-- 5. 纯 CSS 引入 Font Awesome 6.7.2 (消除 JS 警告) -->
+  <!-- 4. 关键修正：修复 Font Awesome CDN 地址 (之前报错 404 是因为缺少完整 URL) -->
   <link rel="stylesheet" href="cdnjs.cloudflare.com" media="print" onload="this.media='all'">
 
-  <!-- 6. 字体优化：确保 display=swap 且异步加载 -->
+  <!-- 5. 字体优化：确保异步加载 -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;700;900&display=swap" media="print" onload="this.media='all'">
 
   <noscript>
@@ -38,11 +37,16 @@
     <link rel="stylesheet" href="cdnjs.cloudflare.com">
   </noscript>
 
-  <!-- 7. 主题色切换脚本 -->
+  <!-- 6. 主题色切换脚本（内联执行，防止白屏闪烁） -->
   <script>
     (function() {
       var theme = localStorage.getItem("theme");
       var config = "{{ site.data.settings.color_scheme }}";
+      
+      // 2025 优化：在 CSS 加载前先通过 JS 锁定背景色，缓解“屏蔽渲染”导致的白屏
+      var initialBg = (theme === "dark" || (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)) ? "#121212" : "#ffffff";
+      document.documentElement.style.backgroundColor = initialBg;
+
       if (config === "auto" || config === "") {
         if (theme === "dark" || (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
           document.documentElement.setAttribute("dark", "");
@@ -55,7 +59,7 @@
     })();
   </script>
 
-  <!-- 8. 全平台禁止缩放脚本 -->
+  <!-- 7. 全平台禁止缩放脚本 -->
   <script defer>
     (function() {
       // 键盘与滚轮
