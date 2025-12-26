@@ -11,6 +11,7 @@
 .far,
 .fab,
 .fa-solid,
+.fa-regular,
 .fa-brands,
 .fa {
   -moz-osx-font-smoothing: grayscale;
@@ -25,6 +26,7 @@
 .far::before,
 .fab::before,
 .fa-solid::before,
+.fa-regular::before,
 .fa-brands::before,
 .fa::before {
   content: var(--fa); }
@@ -33,6 +35,8 @@
 .fas,
 .fa-solid,
 .far,
+.fa-regular {
+  font-family: 'Font Awesome 6 Free'; }
 
 .fa-brands,
 .fab {
