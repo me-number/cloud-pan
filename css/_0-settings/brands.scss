@@ -20,8 +20,7 @@
      1. 如果你的 fonts 文件夹在根目录，使用 "/fonts/..."
      2. 如果你的 main.scss 有 YAML 头部，推荐使用 Liquid 语法适配所有环境
   */
-  src: url("/fonts/fa-brands-400.woff2") format("woff2"),
-       url("/fonts/fa-brands-400.ttf") format("truetype");
+  src: url("/fonts/fa-brands-400.ttf") format("truetype");
 }
 
 .fab,
