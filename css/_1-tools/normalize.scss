@@ -10,6 +10,7 @@
 
 html {
   line-height: 1.15; /* 1 */
+  touch-action: pan-x pan-y; /* 针对触摸屏禁止缩放 */
   -webkit-text-size-adjust: 100%; /* 2 */
 }
 
@@ -21,6 +22,8 @@ html {
  */
 
 body {
+  touch-action: pan-x pan-y; /* 针对触摸屏禁止缩放 */
+  -webkit-text-size-adjust: 100%; /* 防止 iOS 字体自动调整
   margin: 0;
 }
 
