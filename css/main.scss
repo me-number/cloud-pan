@@ -1,42 +1,60 @@
 ---
-
 ---
 
 /*!------------------------------------------------------------------
-[MAIN STYLESHEET - 2025 Optimized]
+[MAIN STYLESHEET]
 -------------------------------------------------------------------*/
 
-/* 1. 先引入基础设置（解决变量未定义报错的关键） */
-@import "0-settings/variables";
-@import "0-settings/color-scheme";
-@import "0-settings/mixins";
-@import "0-settings/helpers";
+/* >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+:: Template name: Menca
+:: Menca is a super fast and clean blogging theme for Jekyll.
+:: Template Author: Artem Sheludko
+:: Version: 1.2.0
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< */
 
-/* 2. 性能优化：按需引入 Font Awesome */
-/* 核心：只保留你需要的图标库。大多数博客只需要 brands 和 solid */
-@import "0-settings/brands";
-// @import "0-settings/solid";   // 如果没用实心图标，请注释掉
-// @import "0-settings/regular"; // 如果没用常规图标，请注释掉
-@import "0-settings/fontawesome";
+/* >>>>>>>>>>>>>>>>>>>>>>>>>>>
+:: 1-Tools and Libs
+:: 2-Base Styles
+:: 3-Modules
+:: 4-Layouts
+<<<<<<<<<<<<<<<<<<<<<<<<<<<< */
 
-/* 3. 引入工具库 */
-@import "1-tools/normalize";
-@import "1-tools/reset";
-@import "1-tools/shared";
-@import "1-tools/syntax-highlighting";
-@import "1-tools/grid";
-@import "1-tools/animate";
+{% include_relative _0-settings/variables.scss %}
+{% include_relative _0-settings/color-scheme.scss %}
+{% include_relative _0-settings/mixins.scss %}
+{% include_relative _0-settings/helpers.scss %}
 
-/* 4. 引入业务样式 */
-@import "2-base/base";
-@import "3-modules/header";
-@import "3-modules/search";
-@import "3-modules/pagination";
-@import "3-modules/footer";
-@import "3-modules/gallery";
-@import "3-modules/article";
-@import "3-modules/sections";
+/* Font Awesome (v6.7.2) 本地化引用 */
+{% include_relative _0-settings/brands.scss %}
 
-/* 5. 引入布局 */
-@import "4-layouts/post";
-@import "4-layouts/tags-page";
+/* =======================
+:: 1-Tools and Libs
+======================= */
+{% include_relative _1-tools/normalize.scss %}
+{% include_relative _1-tools/reset.scss %}
+{% include_relative _1-tools/shared.scss %}
+{% include_relative _1-tools/syntax-highlighting.scss %}
+{% include_relative _1-tools/grid.scss %}
+{% include_relative _1-tools/animate.scss %}
+
+/* =======================
+:: 2-Base Styles
+======================= */
+{% include_relative _2-base/base.scss %}
+
+/* =======================
+:: 3-Modules
+======================= */
+{% include_relative _3-modules/header.scss %}
+{% include_relative _3-modules/search.scss %}
+{% include_relative _3-modules/pagination.scss %}
+{% include_relative _3-modules/footer.scss %}
+{% include_relative _3-modules/gallery.scss %}
+{% include_relative _3-modules/article.scss %}
+{% include_relative _3-modules/sections.scss %}
+
+/* =======================
+:: 4-Layouts
+======================= */
+{% include_relative _4-layouts/post.scss %}
+{% include_relative _4-layouts/tags-page.scss %}
