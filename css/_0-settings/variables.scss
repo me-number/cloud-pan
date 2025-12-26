@@ -1,37 +1,40 @@
 // *****************
-// Global Variables
+// Typography (2025 SEO & Accessibility Optimized)
 // *****************
 
-// Spaces
-$base-spacing-unit: 16px;
-
-// Border radius
-$global-radius: 3px;
-
-// Transition
-$global-transition: all .35s;
-
-
-// *****************
-// Typography
-// *****************
+// 基础排版
 $base-font-size: 20px;
 $base-font-style: normal;
 $base-font-variant: normal;
-$base-font-weight: normal;
+$base-font-weight: 400; // 建议明确为 400 增加清晰度
 $base-font-family: 'Jost', Helvetica Neue, Helvetica, Arial, sans-serif;
-$base-line-height: 1.5;
 
-// Headings
+// 核心修复：行高 (Line Height)
+// 2025 建议：正文行高至少 1.6 才能提供更好的阅读舒适度并减少视觉疲劳
+$base-line-height: 1.6;
+
+// 核心修复：标题 (Headings)
 $heading-font-weight: 700;
 $heading-font-family: 'Jost', Helvetica Neue, Helvetica, Arial, sans-serif;
 
 $font-size-h1:  36px;
-$font-size-h2:  28px;
+$font-size-h2:  30px; // 稍微调大，增加层级对比
 $font-size-h3:  24px;
 $font-size-h4:  20px;
 $font-size-h5:  18px;
 $font-size-h6:  16px;
 
-$heading-line-height: 1.3;
-$heading-letter-spacing: -1px;
+// 核心修复：标题行高与字距
+// 2025 建议：标题行高不宜过紧，建议 1.4；字母间距不宜小于 -0.5px，否则低视力用户难以辨认
+$heading-line-height: 1.4;
+$heading-letter-spacing: -0.5px; 
+
+// *****************
+// 额外对比度辅助（逻辑补充）
+// *****************
+// 确保在你的 _base.scss 中使用了以下逻辑：
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
