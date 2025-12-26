@@ -29,7 +29,6 @@
     3.4-Footer
     3.5-Gallery
     3.7-Article
-    3.8-Contact
     3.9-Sections
     3.10-Section Tags
 :: 4-Layouts
@@ -91,8 +90,6 @@
 {% include_relative _3-modules/gallery.scss %}
 /* >>>>>>>>>>>>>> :: 3.7-Article <<<<<<<<<<<<<<< */
 {% include_relative _3-modules/article.scss %}
-/* >>>>>>>>>>>>>> :: 3.8-Contact <<<<<<<<<<<<<<< */
-{% include_relative _3-modules/contact.scss %}
 /* >>>>>>>>>>>>>> :: 3.9-Sections <<<<<<<<<<<<<<< */
 {% include_relative _3-modules/sections.scss %}
 
