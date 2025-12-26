@@ -15,11 +15,11 @@
   {% if site.data.settings.logo %}
   <link rel="preload" as="image" href="{{ site.data.settings.logo | relative_url }}" fetchpriority="high">
   {% endif %}
-  {% if page.image %}
-  <!-- 1. relative_url 确保路径正确 -->
-  <!-- 2. fetchpriority="high" 让图片下载在所有资源中排队第一 -->
+  <!-- 仅当是文章或独立页面，且不是首页时，才预加载图片 -->
+  {% if page.image and page.layout != 'default' %}
   <link rel="preload" as="image" href="{{ page.image | relative_url }}" fetchpriority="high">
   {% endif %}
+
 
 
   
