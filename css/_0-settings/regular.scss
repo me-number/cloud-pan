@@ -6,16 +6,15 @@
 :root, :host {
   --fa-style-family-classic: 'Font Awesome 6 Free';
   --fa-font-regular: normal 400 1em/1 'Font Awesome 6 Free'; }
-
 @font-face {
   font-family: "Font Awesome 6 Free";
   font-style: normal;
   font-weight: 400;
-  font-display: swap;
-  src: url(/fonts/fa-regular-400.woff2)
-      format("woff2"),
-    url(/fonts/fa-regular-400.ttf)
-      format("truetype");
+  /* 优化：swap 确保在图标加载前不阻塞文本，解决“屏蔽渲染”警告 */
+  font-display: swap; 
+  /* 自动处理 GitHub Pages 的 baseurl 路径 */
+  src: url("{{ '/fonts/fa-regular-400.woff2' | relative_url }}") format("woff2"),
+       url("{{ '/fonts/fa-regular-400.ttf' | relative_url }}") format("truetype");
 }
 
 .far,

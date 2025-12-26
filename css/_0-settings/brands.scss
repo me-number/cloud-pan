@@ -6,16 +6,20 @@
 :root, :host {
   --fa-style-family-brands: 'Font Awesome 6 Brands';
   --fa-font-brands: normal 400 1em/1 'Font Awesome 6 Brands'; }
-
 @font-face {
   font-family: "Font Awesome 6 Brands";
   font-style: normal;
   font-weight: 400;
-  font-display: swap;
-  src: url(/fonts/fa-brands-400.woff2)
-      format("woff2"),
-    url(/fonts/fa-brands-400.ttf)
-      format("truetype");
+  /* 2025 优化：swap 确保图标加载前不阻塞文本渲染，提升 FCP 体验 */
+  font-display: swap; 
+  
+  /* 建议路径：如果 fonts 文件夹在 assets 下，请补充完整路径 */
+  src: url("/fonts/fa-brands-400.woff2") format("woff2"),
+       url("/fonts/fa-brands-400.ttf") format("truetype");
+  
+  /* 如果是在 Jekyll 的 SCSS 文件中，建议这样写以适配所有环境：
+  src: url("{{ '/fonts/fa-brands-400.woff2' | relative_url }}") format("woff2"); 
+  */
 }
 
 .fab,

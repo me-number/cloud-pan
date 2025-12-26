@@ -7,9 +7,6 @@
   <title>{% if page.title %}{{ page.title }}{% else %}{{ site.data.settings.title }}{% endif %}</title>
   <meta name='description' content='{% if page.description %}{{ page.description | strip_html | strip_newlines | truncate: 160 }}{% else %}{{ site.data.settings.description }}{% endif %}'>
 
-  <!-- 1. DNS 预解析 -->
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 
   <link rel="canonical" href="{{ page.url | replace:'index.html','' | absolute_url }}">
   <link rel="alternate" type="application/rss+xml" title="{{ site.data.settings.title | escape }}" href="{{ "/feed.xml" | relative_url }}">
@@ -22,19 +19,23 @@
   <link rel="preload" as="image" href="{{ page.image | relative_url }}" fetchpriority="high">
   {% endif %}
 
+  <!-- 在 head.html 中加入，路径必须与 CSS 里的 url 一致 -->
+  <link rel="preload" href="{{ '/fonts/fa-solid-900.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin>
+  <!-- 在 head.html 中加入 -->
+  <link rel="preload" href="{{ '/fonts/fa-regular-400.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin>
+  <!-- 在 head.html 中加入，路径必须与 CSS 里的 url 一致 -->
+  <link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+
+
+
   <!-- 3. 异步加载主 CSS (带时间戳) -->
   <link rel="stylesheet" href="{{ '/css/main.css' | relative_url }}?v={{ site.time | date: '%Y%m%d%H%M' }}" media="print" onload="this.media='all'">
   
-  <!-- 4. 关键修正：修复 Font Awesome CDN 地址 (之前报错 404 是因为缺少完整 URL) -->
-  <link rel="stylesheet" href="cdnjs.cloudflare.com" media="print" onload="this.media='all'">
-
   <!-- 5. 字体优化：确保异步加载 -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;700;900&display=swap" media="print" onload="this.media='all'">
 
   <noscript>
     <link rel="stylesheet" href="{{ '/css/main.css' | relative_url }}?v={{ site.time | date: '%Y%m%d%H%M' }}">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;700;900&display=swap">
-    <link rel="stylesheet" href="cdnjs.cloudflare.com">
   </noscript>
 
   <!-- 6. 主题色切换脚本（内联执行，防止白屏闪烁） -->

@@ -6,16 +6,16 @@
 :root, :host {
   --fa-style-family-classic: 'Font Awesome 6 Free';
   --fa-font-solid: normal 900 1em/1 'Font Awesome 6 Free'; }
-
+/* Font Awesome 6 Solid (900) 本地化定义 */
 @font-face {
   font-family: "Font Awesome 6 Free";
   font-style: normal;
   font-weight: 900;
-  font-display: swap;
-  src: url(/fonts/fa-solid-900.woff2)
-      format("woff2"),
-    url(/fonts/fa-solid-900.ttf)
-      format("truetype");
+  /* 2025 性能标准：swap 解决“渲染阻塞”警告 */
+  font-display: swap; 
+  /* 建议在 Jekyll 环境下使用过滤器自动适配路径 */
+  src: url("{{ '/fonts/fa-solid-900.woff2' | relative_url }}") format("woff2"),
+       url("{{ '/fonts/fa-solid-900.ttf' | relative_url }}") format("truetype");
 }
 
 .fas,
