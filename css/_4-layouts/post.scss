@@ -20,8 +20,10 @@
 .page-image {
   position: relative;
   transform: translate(0);
-  padding-top: 90%;
-  min-height: 280px;
+  /* 1. 将 90% 改为 56.25% (16:9 比例) */
+  padding-top: 56.25%; 
+  /* 2. 建议移除 min-height 或设为 0，防止在窄屏下容器被强制拉高 */
+  min-height: 0; 
   border-radius: 8px;
   overflow: hidden;
   background: var(--background-alt-color);
@@ -34,10 +36,13 @@
     height: 100%;
     object-fit: cover;
     user-select: none;
+    /* 3. 确保没有边框干扰 */
+    border: none; 
   }
 
   @media only screen and (max-width: $desktop) {
-    padding-top: 65%;
+    /* 4. 桌面端缩放时也保持 56.25% */
+    padding-top: 56.25%; 
     margin-bottom: 40px;
   }
 
@@ -46,17 +51,12 @@
   }
 }
 
+/* 如果 .page-image 已经设置了 56.25%，可以保留，
+   关键是上面的 .post-image 需要同步 */
 .page-image {
   padding-top: 56.25%;
   margin-bottom: 48px;
-
-  @media only screen and (max-width: $desktop) {
-    margin-bottom: 40px;
-  }
-
-  @media only screen and (max-width: $mobile) {
-    margin-bottom: 32px;
-  }
+  min-height: 0; /* 同样建议移除 min-height */
 }
 
 .post-video,
