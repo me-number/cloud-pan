@@ -1,7 +1,8 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- 1. 核心：禁止缩放元标签 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
   <title>{% if page.title %}{{ page.title }}{% else %}{{ site.data.settings.title }}{% endif %}</title>
   <meta name='description' content='{% if page.description %}{{ page.description | strip_html | strip_newlines | truncate: 160 }}{% else %}{{ site.description }}{% endif %}'>
@@ -9,9 +10,18 @@
   <link rel="canonical" href="{{ page.url | replace:'index.html','' | absolute_url }}">
   <link rel="alternate" type="application/rss+xml" title="{{ site.data.settings.title | escape }}" href="{{ "/feed.xml" | relative_url }}">
 
+  <!-- 2. 性能优化：预加载 LCP 关键图片 (Logo 和 文章封面) -->
+  {% if site.data.settings.logo %}
+  <link rel="preload" as="image" href="{{ site.baseurl }}{{ site.data.settings.logo }}" fetchpriority="high">
+  {% endif %}
+  {% if page.image %}
+  <link rel="preload" as="image" href="{{ page.image | relative_url }}" fetchpriority="high">
+  {% endif %}
+
+  <!-- 3. 主题色切换脚本 (保持原样，放置在最前防止闪屏) -->
   <script>
     {% if site.data.settings.color_scheme == "auto" %}
-    if (localStorage.getItem("theme") === "dark") {
+    if (localStorage.getItem("theme") === "dark" || (!localStorage.getItem("theme") && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
       document.documentElement.setAttribute("dark", "");
       document.documentElement.classList.add('dark-mode');
     }
@@ -29,32 +39,46 @@
     {% endif %}
   </script>
 
-  <!-- 禁止缩放的脚本 -->
-<script>
-  (function() {
-    // 禁止键盘缩放
-    document.addEventListener('keydown', function (event) {
-      if ((event.ctrlKey || event.metaKey) && ['+', '-', '=', '0'].includes(event.key)) {
-        event.preventDefault();
-      }
-    }, { passive: false });
+  <!-- 4. 全平台禁止缩放脚本 (增强版：修复 Windows 兼容性 & iOS 双击放大) -->
+  <script>
+    (function() {
+      // 禁止键盘缩放 (Ctrl + +/-/0)
+      document.addEventListener('keydown', function (event) {
+        if ((event.ctrlKey || event.metaKey) && ['+', '-', '=', '0'].includes(event.key)) {
+          event.preventDefault();
+        }
+      }, { passive: false });
 
-    // 禁止滚轮缩放
-    document.addEventListener('wheel', function (event) {
-      if (event.ctrlKey || event.metaKey) {
-        event.preventDefault();
-      }
-    }, { passive: false });
+      // 禁止鼠标滚轮缩放 (Ctrl + Scroll)
+      document.addEventListener('wheel', function (event) {
+        if (event.ctrlKey || event.metaKey) {
+          event.preventDefault();
+        }
+      }, { passive: false });
 
-    // 禁止移动端手势
-    document.addEventListener('touchstart', function (event) {
-      if (event.touches.length > 1) {
-        event.preventDefault();
-      }
-    }, { passive: false });
-  })();
-</script>
+      // 禁止移动端多指缩放
+      document.addEventListener('touchstart', function (event) {
+        if (event.touches.length > 1) {
+          event.preventDefault();
+        }
+      }, { passive: false });
 
+      // 额外防护：禁止 iOS 双击缩放
+      let lastTouchEnd = 0;
+      document.addEventListener('touchend', function (event) {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+          event.preventDefault();
+        }
+        lastTouchEnd = now;
+      }, false);
+    })();
+  </script>
 
+  <!-- 5. 样式表 (添加 touch-action 补充) -->
   <link rel="stylesheet" href="{{ '/css/main.css' | relative_url }}">
+  <style>
+    /* CSS 层面再次锁定禁止缩放手势 */
+    html, body { touch-action: pan-x pan-y; -webkit-text-size-adjust: 100%; }
+  </style>
 </head>
