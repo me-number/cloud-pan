@@ -2,7 +2,7 @@ name: Deploy Rsbuild Site to Pages
 
 on:
   push:
-    branches: ["main"] # 如果你的主分支是 master，请修改此处
+    branches: ["main"]
 
 permissions:
   contents: read
@@ -16,37 +16,36 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 1. 安装 pnpm（Rsbuild 推荐使用高性能包管理器）
+      # 1. 显式安装 pnpm 9.x (2025年稳定版)
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          # 自动读取 package.json 中的 packageManager（如有）或安装最新版
+          version: 9.15.4
           run_install: false
 
-      # 2. 设置 Node.js 20+ 并配置 pnpm 缓存
+      # 2. 设置 Node.js 22 并启用缓存
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "22" # 2025年推荐使用 Node 22 LTS
+          node-version: "22"
           cache: 'pnpm'
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      # 3. 安装依赖（使用 --no-frozen-lockfile 以防本地 lock 文件缺失）
+      # 3. 安装依赖（使用 --no-frozen-lockfile 自动处理本地缺失 lock 文件的报错）
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
       # 4. 执行 Rsbuild 构建
-      # Rsbuild 默认生产环境构建输出目录通常是 'dist'
       - name: Build with Rsbuild
         run: pnpm run build
 
-      # 5. 上传构建产物
+      # 5. 上传 Rsbuild 产物
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # 关键：Rsbuild 默认输出文件夹是 dist，不是 Next.js 的 out
+          # Rsbuild 默认生产环境输出目录是 dist
           path: ./dist 
 
   deploy:
@@ -59,3 +58,4 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
