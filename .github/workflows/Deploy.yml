@@ -27,7 +27,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: 'pnpm' # 只有先装了 pnpm，这里才不会报错
+           # cache: 'pnpm'  <-- 暂时注释掉这一行
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
